@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN   // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
 
+#include <array>
+
 #include <fib.hpp>
 
 constexpr uint32_t fib<0>::value;
@@ -25,19 +27,20 @@ TEST_CASE("meta_fib", "[fib]") {
 // ------------------------------------------------------------------
 TEST_CASE("matrix_fib", "[fib]") {
    // fib-> 0 1 1 2 3 5 8 13
-   fib_matrix fm;
+   CHECK(fib_matrix::get_value(0) == 0);
+   CHECK(fib_matrix::get_value(1) == 1);
+   CHECK(fib_matrix::get_value(2) == 1);
+   CHECK(fib_matrix::get_value(3) == 2);
+   CHECK(fib_matrix::get_value(4) == 3);
+   CHECK(fib_matrix::get_value(5) == 5);
+   CHECK(fib_matrix::get_value(6) == 8);
+   CHECK(fib_matrix::get_value(7) == 13);
+   CHECK(fib_matrix::get_value(8) == 21);
+   CHECK(fib_matrix::get_value(9) == 34);
+   CHECK(fib_matrix::get_value(10) == 55);
 
-   CHECK(fm.get_value(0) == 0);
-   CHECK(fm.get_value(1) == 1);
-   CHECK(fm.get_value(2) == 1);
-   CHECK(fm.get_value(3) == 2);
-   CHECK(fm.get_value(4) == 3);
-   CHECK(fm.get_value(5) == 5);
-   CHECK(fm.get_value(6) == 8);
-   CHECK(fm.get_value(7) == 13);
-   CHECK(fm.get_value(8) == 21);
-   CHECK(fm.get_value(9) == 34);
-   CHECK(fm.get_value(10) == 55);
+   std::array<uint32_t, fib_matrix::get_value(10)> arr;
+   CHECK(arr.size() == 55);
 }
 
 // ------------------------------------------------------------------

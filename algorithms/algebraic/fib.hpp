@@ -23,10 +23,13 @@ struct fib {
 
 // ------------------------------------------------------------------
 struct matrix {
+#if 0
    std::array<uint64_t, 4> m_{1, 1,
                               1, 0};
-
-   matrix& operator*=(const matrix& rhs) {
+#else
+   uint64_t m_[4] = {1, 1, 1, 0};
+#endif // 0
+   constexpr matrix& operator*=(const matrix& rhs) {
       // 0, 1 * 0, 1 = 00 + 12, 01 + 13
       // 2, 3   2, 3   20 + 32, 21 + 33
       matrix m(*this);
@@ -37,7 +40,9 @@ struct matrix {
       m.m_[2] = m_[2]*rhs.m_[0] + m_[3]*rhs.m_[2];
       m.m_[3] = m_[2]*rhs.m_[1] + m_[3]*rhs.m_[3];
 
-      m_.swap(m.m_);
+      for (size_t i = 0, sz = sizeof(m_)/sizeof(m_[0]); i < sz; ++i) {
+         *(m_ + i) = *(m.m_ + i);
+      }
       return *this;
    }
 };
@@ -65,7 +70,7 @@ uint64_t pow_of2_pow(uint64_t base, uint64_t p) {
 
 // ------------------------------------------------------------------
 struct fib_matrix {
-   uint64_t get_value(uint64_t num) const {
+   constexpr static uint64_t get_value(uint64_t num) {
       if (num < 2) return num;
 
       matrix result;
