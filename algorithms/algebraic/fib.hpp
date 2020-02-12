@@ -2,6 +2,43 @@
 
 #include <array>
 
+#include <array>
+#include <math.h>
+
+
+// ------------------------------------------------------------------
+// time O(2^n), space O(2^n)
+uint32_t recursive_fib(uint32_t num) {
+    if (num < 2) return num;
+    return recursive_fib(num - 1) + recursive_fib(num - 2);
+}
+
+// ------------------------------------------------------------------
+// time O(n), space O(1)
+uint32_t cicle_fib(uint32_t num) {
+    if (num < 2) return num;
+
+    uint32_t current{ 1 };
+    uint32_t next{ 1 };
+
+    while (--num > 0) {
+        next = next + current;
+        current = next - current;
+    }
+
+    return current;
+}
+
+// ------------------------------------------------------------------
+// time O(1), space O(1)
+uint32_t golden_ratio_fib(uint8_t num) {
+    if (num < 2) return num;
+
+    const double sq = std::sqrt(5);
+    const double phi = (1 + sq) / 2;
+    return static_cast<uint32_t>(std::pow(phi, num) / sq + .5);
+}
+
 // ------------------------------------------------------------------
 template <uint32_t>
 struct fib;
