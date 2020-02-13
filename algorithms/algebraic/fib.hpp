@@ -8,18 +8,18 @@
 
 // ------------------------------------------------------------------
 // time O(2^n), space O(2^n)
-uint32_t recursive_fib(uint32_t num) {
+uint64_t recursive_fib(uint8_t num) {
     if (num < 2) return num;
     return recursive_fib(num - 1) + recursive_fib(num - 2);
 }
 
 // ------------------------------------------------------------------
 // time O(n), space O(1)
-uint32_t cicle_fib(uint32_t num) {
+uint64_t cycle_fib(uint8_t num) {
     if (num < 2) return num;
 
-    uint32_t current{ 1 };
-    uint32_t next{ 1 };
+    uint64_t current{ 1 };
+    uint64_t next{ 1 };
 
     while (--num > 0) {
         next = next + current;
@@ -31,31 +31,32 @@ uint32_t cicle_fib(uint32_t num) {
 
 // ------------------------------------------------------------------
 // time O(1), space O(1)
-uint32_t golden_ratio_fib(uint8_t num) {
+uint64_t golden_ratio_fib(uint8_t num) {
     if (num < 2) return num;
 
     const double sq = std::sqrt(5);
     const double phi = (1 + sq) / 2;
-    return static_cast<uint32_t>(std::pow(phi, num) / sq + .5);
+    return static_cast<uint64_t>(std::pow(phi, num) / sq + .5);
 }
 
 // ------------------------------------------------------------------
-template <uint32_t>
+// compile- time calculations
+template <uint8_t>
 struct fib;
 
 template<>
 struct fib<0> {
-   static constexpr uint32_t value{0};
+   static constexpr uint64_t value{0};
 };
 
 template<>
 struct fib<1> {
-   static constexpr uint32_t value{1};
+   static constexpr uint64_t value{1};
 };
 
-template<uint32_t Tn>
+template<uint8_t Tn>
 struct fib {
-   static constexpr uint32_t value = fib<Tn-1>::value + fib<Tn-2>::value;
+   static constexpr uint64_t value = fib<Tn-1>::value + fib<Tn-2>::value;
 };
 
 // ------------------------------------------------------------------
@@ -92,20 +93,7 @@ std::ostream& operator <<(std::ostream& os, const matrix& m) {
 }
 
 // ------------------------------------------------------------------
-uint64_t pow_of2_pow(uint64_t base, uint64_t p) {
-   uint64_t result{1};
-
-   while (p > 0) {
-      if (p & 1) {
-         result *= base;
-      }
-      base *= base;
-      p >>= 1;
-   }
-   return result;
-}
-
-// ------------------------------------------------------------------
+// compile- time calculations / O(log(N))
 struct fib_matrix {
    constexpr static uint64_t get_value(uint64_t num) {
       if (num < 2) return num;

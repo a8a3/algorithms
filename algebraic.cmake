@@ -1,5 +1,5 @@
 
-add_executable(algebraic ${CMAKE_CURRENT_SOURCE_DIR}/catch_tests/algebraic.cpp)
+add_executable(algebraic ${CMAKE_CURRENT_SOURCE_DIR}/tests/algebraic.cpp)
 
 set_target_properties(algebraic PROPERTIES
         CXX_STANDARD 17
@@ -9,7 +9,8 @@ set_target_properties(algebraic PROPERTIES
 
 target_include_directories(algebraic
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/algebraic/
+        ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/algebraic
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/include
 )
 
 target_compile_options(algebraic
@@ -19,4 +20,9 @@ target_compile_options(algebraic
         -Wall
         -Wextra
         -Werror
+)
+
+target_link_libraries(algebraic
+        PRIVATE
+        -lstdc++fs  # gcc < 9+ requirements for std::filesystem usage
 )
