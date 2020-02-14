@@ -51,7 +51,7 @@ void green_print(const char* str) {
 // ------------------------------------------------------------------
 template<typename T>
 bool check() {
-   const auto test_dir_path = fs::current_path() / test_dir_name;
+   const auto test_dir_path = T::get_test_dir();
 
    if (!fs::exists(test_dir_path)) {
       std::cerr << test_dir_name << " directory missing\n";

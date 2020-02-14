@@ -18,7 +18,7 @@ bool naive_is_prime(uint32_t val) {
 
 // ------------------------------------------------------------------
 // time O(n), space O(1)
-bool is_prime(uint32_t val) {
+bool sqrt_is_prime(uint32_t val) {
     if (val < 4) return true;
     uint32_t delimeter{ 2 };
 
@@ -32,28 +32,31 @@ bool is_prime(uint32_t val) {
 // ------------------------------------------------------------------
 // time O(log(n)), space O(log(n))
 bool cached_is_prime(uint32_t val) {
+    if (val == 1) return true;
 
-    if (val < 3) return true;
     static std::set<uint32_t> cache{2};
 
+    if (cache.find(val) != cache.end())
+        return true;
+
     for (const auto& i: cache) {
-        if (i * i > val) {
-            break; // for
-        }
         if (val % i == 0) {
             return false;
         }
     }
-    cache.insert(val);
-    return true;
+
+    if (sqrt_is_prime(val)) {
+        cache.insert(val);
+        return true;
+    }
+    return false;
 }
 
 // ------------------------------------------------------------------
-// time O(n*m), space O(1)
-uint32_t primes_count(uint32_t val) {
+static uint32_t primes_count(std::function<uint32_t(uint32_t)> is_prime_func, uint32_t val) {
     uint32_t count = 0;
-    for (uint32_t i = 1; i < val; ++i) {
-        if (naive_is_prime(i)) {
+    for (uint32_t i = 1; i <= val; ++i) {
+        if (is_prime_func(i)) {
             ++count;
         }
     }
@@ -61,12 +64,28 @@ uint32_t primes_count(uint32_t val) {
 }
 
 // ------------------------------------------------------------------
+uint32_t naive_primes_count(uint32_t val) {
+    return primes_count(naive_is_prime, val);
+}
+
+// ------------------------------------------------------------------
+uint32_t cached_primes_count(uint32_t val) {
+    return primes_count(cached_is_prime, val);
+}
+
+// ------------------------------------------------------------------
+uint32_t sqrt_primes_count(uint32_t val) {
+    return primes_count(sqrt_is_prime, val);
+}
+
+// ------------------------------------------------------------------
 // time(O(n*log(log(n))), space O(n)
 template<uint32_t Tval>
-void simple_sieve_of_eratosthenes() {
+size_t simple_sieve_of_eratosthenes() {
     std::bitset<Tval> sieve;
     sieve.set();
-    
+    sieve.reset(0);
+
     const auto mark_childs_as_non_primes = [&sieve](size_t prime) {
         uint32_t ind = prime * prime;
 
@@ -81,4 +100,14 @@ void simple_sieve_of_eratosthenes() {
             mark_childs_as_non_primes(i);
         }
     }
+
+    // print
+    for (size_t i = 0; i < Tval; ++i) {
+        if (sieve[i])
+            std::cerr << i << ", ";
+    }
+    std::cerr << '\n';
+
+
+    return sieve.count();
 }

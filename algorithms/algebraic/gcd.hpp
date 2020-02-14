@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 // ------------------------------------------------------------------
 // time O(n), space O(1)
 uint32_t gcd_euclideus(uint32_t a, uint32_t b) {
