@@ -13,14 +13,11 @@ target_include_directories(algebraic
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/include
 )
 
-target_compile_options(algebraic
-        PRIVATE
-        -O3
-        -Wpedantic
-        -Wall
-        -Wextra
-        -Werror
-)
+if (MSVC)
+    target_compile_options(algebraic PRIVATE /W4 -O3)
+else ()
+    target_compile_options(algebraic PRIVATE -Wall -Wextra -pedantic -Werror -O3)
+endif()
 
 target_link_libraries(algebraic
         PRIVATE

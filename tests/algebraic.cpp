@@ -95,10 +95,10 @@ TEST_CASE("matrix_fib", "[fib]") {
 // ------------------------------------------------------------------
 class fib_files_test {
    friend std::istream& operator>> (std::istream&, fib_files_test&);
-   uint32_t value_{0};
+   uint8_t value_{0};
 
 public:
-   static std::string get_test_dir() {
+   static fs::path get_test_dir() {
       return fs::current_path().parent_path() / "tests/data/algebraic/fib";
    }
 
@@ -128,37 +128,33 @@ public:
 std::istream& operator>>(std::istream& is, fib_files_test& test) {
    std::string value;
    is >> value;
-   test.value_ = std::stoi(value);
+   test.value_ = static_cast<uint8_t>(std::stoul(value));
    return is;
 }
 
 // ------------------------------------------------------------------
 TEST_CASE("fib_files_test", "[fib]") {
    files_tester::check<fib_files_test>();
-//   test: recursive fib, value: 50, expected: 12586269025
-//   elapsed time: 49779631 us
-//   test: cycle fib, value: 50, expected: 12586269025
-//   elapsed time: 0 us
-//   test: golden ratio fib, value: 50, expected: 12586269025
-//   elapsed time: 12 us
-//   test: matrix fib, value: 50, expected: 12586269025
-//   elapsed time: 0 us
-//   test: recursive fib, value: 10, expected: 55
-//   elapsed time: 0 us
-//   test: cycle fib, value: 10, expected: 55
-//   elapsed time: 0 us
-//   test: golden ratio fib, value: 10, expected: 55
-//   elapsed time: 0 us
-//   test: matrix fib, value: 10, expected: 55
-//   elapsed time: 0 us
-//   test: recursive fib, value: 20, expected: 6765
-//   elapsed time: 23 us
-//   test: cycle fib, value: 20, expected: 6765
-//   elapsed time: 0 us
-//   test: golden ratio fib, value: 20, expected: 6765
-//   elapsed time: 0 us
-//   test: matrix fib, value: 20, expected: 6765
-//   elapsed time: 0 us
+
+// Поиск числа Фибоначчи
+// Реализованы методы
+// - рекурсивный поиск;
+// - поиск в цикле;
+// - поиск с использование золотого сечения;
+// - через умножение матриц
+
+//                  номер числа     время
+//recursive fib     20              23 us
+//cycle fib                         0 us
+//golden ratio fib                  0 us
+//matrix fib                        0 us
+
+//recursive fib     50              49779631 us
+//cycle fib                         0 us
+//golden ratio fib                  12 us
+//matrix fib                        0 us
+
+// Ощутимое время выполнялся только рекурсивный метод
 }
 
 // ------------------------------------------------------------------
@@ -215,7 +211,7 @@ class gcd_files_test {
    };
 
 public:
-   static std::string get_test_dir() {
+   static fs::path get_test_dir() {
       return fs::current_path().parent_path() / "tests/data/algebraic/gcd";
    }
 
@@ -252,36 +248,22 @@ std::istream& operator>>(std::istream& is, gcd_files_test& test) {
 TEST_CASE("gcd_files_test", "[gcd]") {
    files_tester::check<gcd_files_test>();
 
-//   test: gcd_euclideus, first: 2, second: 1234567890, expected: 2
-//   elapsed time: 1120044 us
-//   test: gcd_use_mod, first: 2, second: 1234567890, expected: 2
-//   elapsed time: 0 us
-//   test: gcd_use_recursive_mod, first: 2, second: 1234567890, expected: 2
-//   elapsed time: 0 us
-//   test: gcd_euclideus, first: 201, second: 15, expected: 3
-//   elapsed time: 0 us
-//   test: gcd_use_mod, first: 201, second: 15, expected: 3
-//   elapsed time: 0 us
-//   test: gcd_use_recursive_mod, first: 201, second: 15, expected: 3
-//   elapsed time: 0 us
-//   test: gcd_euclideus, first: 20, second: 15, expected: 5
-//   elapsed time: 0 us
-//   test: gcd_use_mod, first: 20, second: 15, expected: 5
-//   elapsed time: 0 us
-//   test: gcd_use_recursive_mod, first: 20, second: 15, expected: 5
-//   elapsed time: 0 us
-//   test: gcd_euclideus, first: 1, second: 1234567890, expected: 1
-//   elapsed time: 1274348 us
-//   test: gcd_use_mod, first: 1, second: 1234567890, expected: 1
-//   elapsed time: 0 us
-//   test: gcd_use_recursive_mod, first: 1, second: 1234567890, expected: 1
-//   elapsed time: 0 us
-//   test: gcd_euclideus, first: 121, second: 22, expected: 11
-//   elapsed time: 0 us
-//   test: gcd_use_mod, first: 121, second: 22, expected: 11
-//   elapsed time: 0 us
-//   test: gcd_use_recursive_mod, first: 121, second: 22, expected: 11
-//   elapsed time: 0 us
+// НОД
+// Реализовано получение НОД алгоритмом Евклида через 
+// - вычитание;
+// - через остаток от деления;
+// - через рекурсивный вызов;
+
+//                          для чисел       рез-т  времени затрачено(микросекунд)
+//через вычитание,          1, 1234567890   1      1274348 us
+//через остаток от деления, 1, 1234567890   1            0 us
+
+//через вычитание,          2, 1234567890   2      1120044 us
+//через остаток от деления, 2, 1234567890   2            0 us
+
+// Только алгоритм через вычитание выполнялся ощутимое время, ~1.2 секунды для большого количества
+// операций, остальные давали результат меньше микросекунды
+
 }
 
 TEST_CASE("simple_pow", "[pow]") {
@@ -322,7 +304,7 @@ class pow_files_test {
    };
 
 public:
-   static std::string get_test_dir() {
+   static fs::path get_test_dir() {
       return fs::current_path().parent_path() / "tests/data/algebraic/pow";
    }
 
@@ -359,36 +341,14 @@ std::istream& operator>>(std::istream& is, pow_files_test& test) {
 // ------------------------------------------------------------------
 TEST_CASE("pow_files_test", "[pow]") {
    files_tester::check<pow_files_test>();
-//   test: simple_pow, base: 2, pow: 16, expected: 65536
-//   elapsed time: 0 us
-//   test: use_pow_of_2, base: 2, pow: 16, expected: 65536
-//   elapsed time: 0 us
-//   test: use_pow_of_p, base: 2, pow: 16, expected: 65536
-//   elapsed time: 0 us
-//   test: simple_pow, base: 2, pow: 10, expected: 1024
-//   elapsed time: 0 us
-//   test: use_pow_of_2, base: 2, pow: 10, expected: 1024
-//   elapsed time: 0 us
-//   test: use_pow_of_p, base: 2, pow: 10, expected: 1024
-//   elapsed time: 0 us
-//   test: simple_pow, base: 2, pow: 1, expected: 2
-//   elapsed time: 0 us
-//   test: use_pow_of_2, base: 2, pow: 1, expected: 2
-//   elapsed time: 0 us
-//   test: use_pow_of_p, base: 2, pow: 1, expected: 2
-//   elapsed time: 0 us
-//   test: simple_pow, base: 2, pow: 32, expected: 4294967296
-//   elapsed time: 0 us
-//   test: use_pow_of_2, base: 2, pow: 32, expected: 4294967296
-//   elapsed time: 0 us
-//   test: use_pow_of_p, base: 2, pow: 32, expected: 4294967296
-//   elapsed time: 0 us
-//   test: simple_pow, base: 10, pow: 4, expected: 10000
-//   elapsed time: 0 us
-//   test: use_pow_of_2, base: 10, pow: 4, expected: 10000
-//   elapsed time: 0 us
-//   test: use_pow_of_p, base: 10, pow: 4, expected: 10000
-//   elapsed time: 0 us
+
+// Возведение в степень
+// Реализовано возведение целого числа в степень через:
+// - простое домножение;
+// - возведение в квадрат с домножением в конце;
+// - разложение показателя степени в двоичную форму;
+// 
+// Все тесты показали время меншье 1 микросекунды;
 }
 
 
@@ -462,7 +422,7 @@ TEST_CASE("cached_primes_count", "[primes_count]") {
 // ------------------------------------------------------------------
 class primes_files_test {
    friend std::istream& operator>> (std::istream&, primes_files_test&);
-   uint64_t num_{0};
+   uint32_t num_{0};
 
    struct executor {
       std::function<uint32_t(uint32_t)> func_;
@@ -470,7 +430,7 @@ class primes_files_test {
    };
 
 public:
-   static std::string get_test_dir() {
+   static fs::path get_test_dir() {
       return fs::current_path().parent_path() / "tests/data/algebraic/primes";
    }
 
@@ -498,41 +458,38 @@ public:
 std::istream& operator>>(std::istream& is, primes_files_test& test) {
    std::string number;
    is >> number;
-   test.num_ = std::stoi(number);
+   test.num_ = static_cast<uint32_t>(std::stoul(number));
    return is;
 }
 
 TEST_CASE("primes_files_test", "[primes_count]") {
    files_tester::check<primes_files_test>();
 
-//   test: naive_primes_count, number: 50000, expected: 5134
-//   elapsed time: 453347 us
-//   test: sqrt_primes_count, number: 50000, expected: 5134
-//   elapsed time: 3806 us
-//   test: cached_primes_count, number: 50000, expected: 5134
-//   elapsed time: 197377 us
-//   test: naive_primes_count, number: 10000, expected: 1230
-//   elapsed time: 34079 us
-//   test: sqrt_primes_count, number: 10000, expected: 1230
-//   elapsed time: 366 us
-//   test: cached_primes_count, number: 10000, expected: 1230
-//   elapsed time: 2364 us
-//   test: naive_primes_count, number: 100, expected: 26
-//   elapsed time: 4 us
-//   test: sqrt_primes_count, number: 100, expected: 26
-//   elapsed time: 1 us
-//   test: cached_primes_count, number: 100, expected: 26
-//   elapsed time: 5 us
-//   test: naive_primes_count, number: 100000, expected: 9593
-//   elapsed time: 1553549 us
-//   test: sqrt_primes_count, number: 100000, expected: 9593
-//   elapsed time: 6479 us
-//   test: cached_primes_count, number: 100000, expected: 9593
-//   elapsed time: 192075 us
-//   test: naive_primes_count, number: 1000, expected: 169
-//   elapsed time: 176 us
-//   test: sqrt_primes_count, number: 1000, expected: 169
-//   elapsed time: 17 us
-//   test: cached_primes_count, number: 1000, expected: 169
-//   elapsed time: 48 us
+// Нахождение количества простых чисел на интервале
+// Реализовано через
+// - определение простого числа через перебор множителей;
+// - через перебор множителей с ограничение до корня;
+// - через кеширование простых чисел;
+// - построение решета Эратосфена;
+
+// перебор множителей       100          4 us
+// перебор до корня                      1 us
+// кеширование                           5 us
+
+// перебор множителей       1000       176 us
+// перебор до корня                     17 us
+// кеширование                          48 us
+
+// перебор множителей       10000    34079 us
+// перебор до корня                    366 us
+// кеширование                        2364 us
+
+// перебор множителей       50000   453347 us
+// перебор до корня                   3806 us
+// кеширование                      197377 us
+
+// перебор множителей       100000 1553549 us
+// перебор до корня                   6479 us
+// кеширование, number              192075 us
+
 }
