@@ -144,15 +144,15 @@ TEST_CASE("fib_files_test", "[fib]") {
 // - через умножение матриц
 
 //                  номер числа     время
-//recursive fib     20              23 us
-//cycle fib                         0 us
-//golden ratio fib                  0 us
-//matrix fib                        0 us
+//рекурсивно                 20         23 us
+//циклом                                 0 us
+//золотым сечением                       0 us
+//умножением матриц                      0 us
 
-//recursive fib     50              49779631 us
-//cycle fib                         0 us
-//golden ratio fib                  12 us
-//matrix fib                        0 us
+//рекурсивно                 50   49779631 us
+//циклом                                 0 us
+//золотым сечением                      12 us
+//умножением матриц                      0 us
 
 // Ощутимое время выполнялся только рекурсивный метод
 }
