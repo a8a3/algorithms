@@ -5,14 +5,22 @@ template<typename T>
 class array {
 
 public:
-    size_t size() const {return size_;}
-    const T& operator[](size_t idx) const { return arr_[idx]; }
+   virtual size_t size    () const                    = 0;
+   virtual void   add_back(const T& item)             = 0;
+   virtual void   add     (const T& item, size_t idx) = 0;
+   virtual T      remove  (size_t idx)                = 0;
 
-    virtual void add_back(const T& item)             = 0;
-    virtual void add     (const T& item, size_t idx) = 0;
-    virtual T    remove  (size_t idx)                = 0;
+   virtual ~array() {delete []arr_;}
 
-    virtual ~array() {delete []arr_;}
+   const T& get(size_t idx) const {
+     if (idx >= size_) {
+        throw std::out_of_range("incorrect index requested");
+     }
+     return arr_[idx];
+   }
+
+
+   const T& operator[](size_t idx) const { return arr_[idx]; }
 
 protected:
     T* arr_{ nullptr };
@@ -31,6 +39,10 @@ void copy_range(const T* src, T* dst, size_t size) {
 template<typename T>
 class single_array : public array<T> {
 public:
+
+   size_t size() const override {
+      return array<T>::size_;
+   }
 
    void add_back(const T& item) override {
       add(item, array<T>::size_);
@@ -52,7 +64,7 @@ public:
          copy_range(arr, buf, sz);
       } else { // add in middle
          copy_range(arr, buf, idx);
-         copy_range(arr+idx, buf+idx+1, sz-idx);
+         copy_range(arr+idx, buf+(idx+1), sz-idx);
       }
       delete []arr;
       arr = buf;
@@ -72,7 +84,7 @@ public:
        T* buf = new T[sz - 1];
 
        copy_range(arr, buf, idx);
-       copy_range(arr+idx+1, buf+idx, sz-(idx+1));
+       copy_range(arr+(idx+1), buf+idx, sz-(idx+1));
 
        delete []arr;
        arr = buf;
@@ -82,21 +94,46 @@ public:
 };
 
 // ------------------------------------------------------------------
-template <typename T>
+template <typename T, size_t E = 32>
 class vector_array : public array<T> {
-   void add_back(const T& item) override {
-      add(item, array<T>::size_);
+
+public:
+   size_t size() const override {
+      return current_size_;
    }
 
-   void add(const T&, size_t idx) override {
-      auto& sz = array<T>::size_;
-      if (idx > sz) {
+   size_t capacity() const {
+      return array<T>::size_;
+   }
+
+   void add_back(const T& item) override {
+      add(item, current_size_);
+   }
+
+   void add(const T& item, size_t idx) override {
+      if (idx > current_size_) {
          throw std::out_of_range("incorrect index requested");
       }
+      auto& total_sz = array<T>::size_;
       auto& arr = array<T>::arr_;
-      ++sz;
+
+      if (current_size_ == total_sz) {
+         T* buf = new T[total_sz+E];
+         copy_range(arr, buf, total_sz);
+         delete []arr;
+         arr = buf;
+         total_sz = total_sz+E;
+      }
+      if (idx == 0) { // add to front
+         move_right(arr, current_size_);
+      } else if (idx != current_size_){ // add in middle
+         move_right(arr+idx, current_size_-idx);
+      }
+      arr[idx] = item;
+      ++current_size_;
    }
 
+   // TODO
    T remove(size_t idx) override {
       auto& sz = array<T>::size_;
 
@@ -109,6 +146,15 @@ class vector_array : public array<T> {
       T result{arr[idx]};
       --sz;
       return result;
+   }
+
+private:
+   size_t current_size_{0};
+
+   void move_right(T* from, size_t count) {
+      for (; count > 0; --count) {
+         std::swap(*(from+count), *(from+(count-1)));
+      }
    }
 };
 
