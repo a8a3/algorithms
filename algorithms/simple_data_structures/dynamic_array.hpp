@@ -12,12 +12,7 @@ public:
 
    virtual ~array() {delete []arr_;}
 
-   const T& get(size_t idx) const {
-     if (idx >= size_) {
-        throw std::out_of_range("incorrect index requested");
-     }
-     return arr_[idx];
-   }
+   virtual const T& get(size_t idx) const = 0 ;
 
 
    const T& operator[](size_t idx) const { return arr_[idx]; }
@@ -58,14 +53,9 @@ public:
       T* buf = new T[sz + 1];
       buf[idx] = item;
 
-      if (idx == 0) { // add to front
-         copy_range(arr, buf + 1, sz);
-      } else if (idx == sz) { // add to back
-         copy_range(arr, buf, sz);
-      } else { // add in middle
-         copy_range(arr, buf, idx);
-         copy_range(arr+idx, buf+(idx+1), sz-idx);
-      }
+      copy_range(arr, buf, idx);
+      copy_range(arr+idx, buf+(idx+1), sz-idx);
+
       delete []arr;
       arr = buf;
       ++sz;
@@ -91,10 +81,17 @@ public:
        --sz;
        return result;
     }
+
+    const T& get(size_t idx) const override {
+       if (idx >= array<T>::size_) {
+          throw std::out_of_range("incorrect index requested");
+       }
+       return array<T>::arr_[idx];
+    }
 };
 
 // ------------------------------------------------------------------
-template <typename T, size_t E = 32>
+template <typename T, size_t E = 8>
 class vector_array : public array<T> {
 
 public:
@@ -114,38 +111,49 @@ public:
       if (idx > current_size_) {
          throw std::out_of_range("incorrect index requested");
       }
-      auto& total_sz = array<T>::size_;
-      auto& arr = array<T>::arr_;
+      auto& capacity = array<T>::size_;
+      auto buf = array<T>::arr_;
 
-      if (current_size_ == total_sz) {
-         T* buf = new T[total_sz+E];
-         copy_range(arr, buf, total_sz);
-         delete []arr;
-         arr = buf;
-         total_sz = total_sz+E;
+      if (current_size_ == capacity) {
+         buf = new T[capacity+E];
+         capacity = capacity+E;
       }
-      if (idx == 0) { // add to front
-         move_right(arr, current_size_);
-      } else if (idx != current_size_){ // add in middle
-         move_right(arr+idx, current_size_-idx);
+      const auto reallocation_happened = buf != array<T>::arr_;
+
+      if (reallocation_happened) {
+         copy_range(array<T>::arr_, buf, idx);
+         copy_range(array<T>::arr_ + idx, buf + (idx+1), current_size_-idx);
+      } else {
+         move_right(buf+idx, current_size_ - idx);
       }
-      arr[idx] = item;
+      buf[idx] = item;
+
+      if (reallocation_happened) {
+         delete []array<T>::arr_;
+         array<T>::arr_ = buf;
+      }
       ++current_size_;
    }
 
-   // TODO
    T remove(size_t idx) override {
-      auto& sz = array<T>::size_;
-
-      if (idx >= sz) {
+      if (idx >= current_size_) {
          throw std::out_of_range("incorrect index requested");
       }
 
       auto& arr = array<T>::arr_;
-
       T result{arr[idx]};
-      --sz;
+
+      move_left(arr + idx, current_size_-(idx+1));
+
+      --current_size_;
       return result;
+   }
+
+   const T& get(size_t idx) const override {
+      if (idx >= current_size_) {
+         throw std::out_of_range("incorrect index requested");
+      }
+      return array<T>::arr_[idx];
    }
 
 private:
@@ -153,12 +161,22 @@ private:
 
    void move_right(T* from, size_t count) {
       for (; count > 0; --count) {
-         std::swap(*(from+count), *(from+(count-1)));
+               auto& next = *(from + count);
+         const auto& prev = *(from + (count-1));
+         next = prev;
       }
    }
+
+   void move_left(T* from, size_t count) {
+      for (size_t i = 0; i < count; ++i) {
+               auto& prev = *(from+i);
+         const auto& next = *(from+(i+1));
+         prev = next;
+      }
+   }
+
 };
 
 // TODO
-//class vector_array {};
 //class factor_array {};
 //class matrix_array {};

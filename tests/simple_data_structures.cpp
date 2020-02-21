@@ -24,11 +24,11 @@ std::vector<T> as_vector(const array<T>& array){
 }
 
 // ------------------------------------------------------------------
-TEMPLATE_TEST_CASE("dynamic_arrays_commit_tests", "[dynamic_array][template]", (single_array<int>)) {
+TEMPLATE_TEST_CASE("dynamic_arrays_commit_tests", "[dynamic_array][template]", (single_array<int>), (vector_array<int, 5>)) {
    TestType array;
    REQUIRE(array.size() == 0);
 
-   SECTION("add values to back and delete it from back") {
+   SECTION("add values to back and remove it from back") {
       array.add_back(0);
       array.add_back(1);
       array.add_back(2);
@@ -47,7 +47,7 @@ TEMPLATE_TEST_CASE("dynamic_arrays_commit_tests", "[dynamic_array][template]", (
 
       CHECK(array.size() == 0);
    }
-   SECTION("add values to front and delete it from front") {
+   SECTION("add values to front and remove it from front") {
       array.add(0, 0);
       array.add(1, 0);
       array.add(2, 0);
@@ -64,7 +64,7 @@ TEMPLATE_TEST_CASE("dynamic_arrays_commit_tests", "[dynamic_array][template]", (
 
       CHECK(array.size() == 0);
    }
-   SECTION("add values in middle and delete it from middle") {
+   SECTION("add values in middle and remove it from middle") {
       array.add(10, 0);
       array.add(20, 1);
       array.add(30, 2);
