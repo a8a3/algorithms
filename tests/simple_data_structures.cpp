@@ -127,7 +127,7 @@ TEST_CASE("vector_array_test", "[vector_array]") {
       array.add_back(50);
 
       REQUIRE(array.size() == ARRAY_FACTOR+1);
-      REQUIRE(array.capacity() == ARRAY_FACTOR*2);
+      REQUIRE(array.capacity() == ARRAY_FACTOR+ARRAY_FACTOR);
    }
    SECTION("insert values with memory reallocation in the middle of array") {
       array.add_back(10);
@@ -140,7 +140,39 @@ TEST_CASE("vector_array_test", "[vector_array]") {
 
       array.add(42, 2);
       REQUIRE(array.size() == ARRAY_FACTOR+1);
-      REQUIRE(array.capacity() == ARRAY_FACTOR*2);
+      REQUIRE(array.capacity() == ARRAY_FACTOR+ARRAY_FACTOR);
       CHECK(as_vector<int>(array) == std::vector<int>{10, 20, 42, 30, 40});
    }
+}
+
+// ------------------------------------------------------------------
+TEST_CASE("factor_array_test", "[factor_array]") {
+    constexpr auto ARRAY_FACTOR{ 4 };
+    vector_array<int, ARRAY_FACTOR> array;
+    REQUIRE(array.size() == 0);
+    REQUIRE(array.capacity() == 0);
+
+    SECTION("insert values without memory reallocation") {
+        array.add_back(10);
+        REQUIRE(array.size() == 1);
+        REQUIRE(array.capacity() == ARRAY_FACTOR);
+        array.add_back(20);
+        array.add_back(30);
+        array.add_back(40);
+
+        REQUIRE(array.size() == ARRAY_FACTOR);
+        REQUIRE(array.capacity() == ARRAY_FACTOR);
+    }
+    SECTION("insert values with memory reallocation") {
+        array.add_back(10);
+        REQUIRE(array.size() == 1);
+        REQUIRE(array.capacity() == ARRAY_FACTOR);
+        array.add_back(20);
+        array.add_back(30);
+        array.add_back(40);
+        array.add_back(50);
+
+        REQUIRE(array.size() == ARRAY_FACTOR + 1);
+        REQUIRE(array.capacity() == ARRAY_FACTOR + ARRAY_FACTOR);
+    }
 }

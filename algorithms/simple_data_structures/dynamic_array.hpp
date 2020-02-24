@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <map>
+
 // ------------------------------------------------------------------
 template<typename T>
 class array {
@@ -25,6 +28,10 @@ protected:
 // ------------------------------------------------------------------
 template <typename T>
 void copy_range(const T* src, T* dst, size_t size) {
+   if (src == dst) {
+        return;
+   }
+
    for (size_t i = 0; i < size; ++i) {
       *(dst + i) = *(src + i);
    }
@@ -91,7 +98,7 @@ public:
 };
 
 // ------------------------------------------------------------------
-template <typename T, size_t E = 8>
+template <typename T, size_t E = 8, typename AllocPolicy = std::plus<size_t>>
 class vector_array : public array<T> {
 
 public:
@@ -115,8 +122,8 @@ public:
       auto buf = array<T>::arr_;
 
       if (current_size_ == capacity) {
-         buf = new T[capacity+E];
-         capacity = capacity+E;
+         capacity = AllocPolicy()(capacity, E);
+         buf = new T[capacity];
       }
       const auto reallocation_happened = buf != array<T>::arr_;
 
@@ -174,8 +181,11 @@ private:
          prev = next;
       }
    }
-
 };
+
+// ------------------------------------------------------------------
+template<typename T, size_t E>
+using factor_array = vector_array<T, E, std::multiplies<size_t>>;
 
 // TODO
 //class factor_array {};
