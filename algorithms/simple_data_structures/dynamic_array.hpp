@@ -3,11 +3,46 @@
 #include <functional>
 #include <map>
 
+namespace {
+
+template <typename T>
+void copy_range(const T* src, T* dst, size_t size) {
+   if (src == dst) {
+      return;
+   }
+
+   for (size_t i = 0; i < size; ++i) {
+      *(dst + i) = *(src + i);
+   }
+}
+
+template <typename T>
+void move_right(T* from, size_t count) {
+   for (; count > 0; --count) {
+      auto& next = *(from + count);
+      const auto& prev = *(from + (count-1));
+      next = prev;
+   }
+}
+
+template <typename T>
+void move_left(T* from, size_t count) {
+   for (size_t i = 0; i < count; ++i) {
+      auto& prev = *(from+i);
+      const auto& next = *(from+(i+1));
+      prev = next;
+   }
+}
+
+} // anonymous namespace
+
 // ------------------------------------------------------------------
 template<typename T>
 class array {
 
 public:
+   array(size_t sz = 0) : size_(sz) {}
+
    virtual size_t size    () const                    = 0;
    virtual void   add_back(const T& item)             = 0;
    virtual void   add     (const T& item, size_t idx) = 0;
@@ -22,20 +57,8 @@ public:
 
 protected:
     T* arr_{ nullptr };
-    size_t size_{ 0 };
+    size_t size_;
 };
-
-// ------------------------------------------------------------------
-template <typename T>
-void copy_range(const T* src, T* dst, size_t size) {
-   if (src == dst) {
-        return;
-   }
-
-   for (size_t i = 0; i < size; ++i) {
-      *(dst + i) = *(src + i);
-   }
-}
 
 // ------------------------------------------------------------------
 template<typename T>
@@ -102,6 +125,10 @@ template <typename T, size_t E = 8, typename AllocPolicy = std::plus<size_t>>
 class vector_array : public array<T> {
 
 public:
+   vector_array() : array<T>(E) {
+      array<T>::arr_ = new T[array<T>::size_];
+   }
+
    size_t size() const override {
       return current_size_;
    }
@@ -165,22 +192,6 @@ public:
 
 private:
    size_t current_size_{0};
-
-   void move_right(T* from, size_t count) {
-      for (; count > 0; --count) {
-               auto& next = *(from + count);
-         const auto& prev = *(from + (count-1));
-         next = prev;
-      }
-   }
-
-   void move_left(T* from, size_t count) {
-      for (size_t i = 0; i < count; ++i) {
-               auto& prev = *(from+i);
-         const auto& next = *(from+(i+1));
-         prev = next;
-      }
-   }
 };
 
 // ------------------------------------------------------------------
@@ -188,5 +199,4 @@ template<typename T, size_t E>
 using factor_array = vector_array<T, E, std::multiplies<size_t>>;
 
 // TODO
-//class factor_array {};
 //class matrix_array {};
