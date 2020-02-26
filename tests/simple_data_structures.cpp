@@ -234,6 +234,18 @@ TEST_CASE("matrix_array_test", "[matrix_array]") {
       array.add(42, 1);
       CHECK(as_vector<int>(array) == std::vector<int>{10, 42, 20});
    }
+   SECTION("insert values in the middle of array with memory reallocation") {
+       array.add_back(1);
+       array.add_back(2);
+       array.add_back(3);
+       array.add_back(4);
+       array.add_back(5);
+       array.add_back(6);
+       array.add_back(7);
+       CHECK(as_vector<int>(array) == std::vector<int>{1, 2, 3, 4, 5, 6, 7});
 
+       array.add(42, 1);
+       CHECK(as_vector<int>(array) == std::vector<int>{1, 42, 2, 3, 4, 5, 6, 7});
+   }
 }
 

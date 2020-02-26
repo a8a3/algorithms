@@ -213,10 +213,10 @@ template<typename T, size_t E>
 class matrix_array : public array<T> {
 public:
    matrix_array() : array<T>(E) {
-      chunks_.push_back(new T[E]);
+      rows_.push_back(new T[E]);
    }
 
-   // TODO check leaks with valgrind
+   // TODO check leaks with valgrind or memory sanitizer
    ~matrix_array() override {}
 
    size_t size() const override {
@@ -235,7 +235,6 @@ public:
       add(item, 0);
    }
 
-   // TODO
    void add(const T& item, size_t idx) override {
       if (idx > size_) {
          throw std::out_of_range("incorrect index requested");
@@ -244,31 +243,28 @@ public:
       auto& capacity = array<T>::capacity_;
       if (size_ == capacity) {
          capacity += capacity;
-         chunks_.push_back(new T[E]);
+         rows_.push_back(new T[E]);
       }
 
-      //     42
-      //     |
-      // 0 1 2 3 4
-      // 5 6 7 8 .
-      //
-      //
-
-//      auto last_in_chunk = chunk[E-1];
-//      move_right(chunk + idx, E-(idx+1));
-//
-//      for (size_t i = chunk_idx + 1, sz = chunks_.size(); i < sz; ++i) {
-//         chunk = chunks_[i];
-//         auto tmp = chunk[E-1];
-//         move_right(chunk, E-1);
-//         chunk[0] = last_in_chunk;
-//         last_in_chunk = tmp;
-//      }
+// 2 3 4  =>  1 2 3
+// . . .  =>  4 . .
 
       const auto row_idx = idx/E;
       const auto col_idx = idx%E;
-      auto row = chunks_[row_idx];
-      move_right(row+col_idx, E-(col_idx+1));
+      auto row = rows_[row_idx];
+
+      auto last = row[E-1];
+      move_right(row + col_idx, E - (col_idx + 1)); // move current row items to the right
+
+      // move last item to the next row through the all rows
+      for (size_t i = row_idx + 1, sz = rows_.size(); i < sz; ++i) {
+          auto current_row = rows_[i];
+          auto current_last = current_row[E - 1];
+          move_right(current_row, E - 1);
+          current_row[0] = last;
+          last = current_last;
+      }
+      
       row[col_idx] = item;
       ++size_;
    }
@@ -293,12 +289,12 @@ public:
       if (idx >= size_) {
          throw std::out_of_range("incorrect index requested");
       }
-      return chunks_[idx/E][idx%E];
+      return rows_[idx/E][idx%E];
    }
 
 private:
    size_t size_{0};
-   std::vector<T*> chunks_;
+   std::vector<T*> rows_;
 };
 
 
