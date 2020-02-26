@@ -18,13 +18,13 @@ template <typename T>
 std::vector<T> as_vector(const array<T>& array){
    std::vector<T> result(array.size());
    for (size_t i = 0, sz = array.size(); i < sz; ++i) {
-      result[i] = array[i];
+      result[i] = array.get(i);
    }
    return result;
 }
 
 // ------------------------------------------------------------------
-TEMPLATE_TEST_CASE("dynamic_arrays_commit_tests", "[dynamic_array][template]", (single_array<int>), (vector_array<int, 5>), (factor_array<int, 5>)) {
+TEMPLATE_TEST_CASE("dynamic_arrays_common_tests", "[dynamic_array][template]", (single_array<int>), (vector_array<int, 5>), (factor_array<int, 5>)) {
    TestType array;
    REQUIRE(array.size() == 0);
 
@@ -48,11 +48,11 @@ TEMPLATE_TEST_CASE("dynamic_arrays_commit_tests", "[dynamic_array][template]", (
       CHECK(array.size() == 0);
    }
    SECTION("add values to front and remove it from front") {
-      array.add(0, 0);
-      array.add(1, 0);
-      array.add(2, 0);
-      array.add(3, 0);
-      array.add(4, 0);
+      array.add_front(0);
+      array.add_front(1);
+      array.add_front(2);
+      array.add_front(3);
+      array.add_front(4);
       CHECK(array.size() == 5);
       CHECK(as_vector<int>(array) == std::vector<int>{4, 3, 2, 1, 0});
 
@@ -172,3 +172,68 @@ TEST_CASE("factor_array_test", "[factor_array]") {
         REQUIRE(array.capacity() == FACTOR * FACTOR);
     }
 }
+
+// ------------------------------------------------------------------
+TEST_CASE("matrix_array_test", "[matrix_array]") {
+   constexpr auto FACTOR{ 3 };
+   matrix_array<int, FACTOR> array;
+   REQUIRE(array.size() == 0);
+   REQUIRE(array.capacity() == FACTOR);
+
+   SECTION("insert values to front without memory reallocation") {
+      array.add_front(10);
+      REQUIRE(array.size() == 1);
+      REQUIRE(array.capacity() == FACTOR);
+      array.add_front(20);
+      array.add_front(30);
+
+      REQUIRE(array.size() == FACTOR);
+      REQUIRE(array.capacity() == FACTOR);
+
+      CHECK(as_vector<int>(array) == std::vector<int>{30, 20, 10});
+   }
+   SECTION("insert values to front with memory reallocation") {
+      array.add_front(10);
+      array.add_front(20);
+      array.add_front(30);
+      array.add_front(40);
+
+      REQUIRE(array.size() == FACTOR + 1);
+      REQUIRE(array.capacity() == FACTOR + FACTOR);
+
+      CHECK(as_vector<int>(array) == std::vector<int>{40, 30, 20, 10});
+   }
+   SECTION("insert values to back without memory reallocation") {
+      array.add_back(10);
+      REQUIRE(array.size() == 1);
+      REQUIRE(array.capacity() == FACTOR);
+      array.add_back(20);
+      array.add_back(30);
+
+      REQUIRE(array.size() == FACTOR);
+      REQUIRE(array.capacity() == FACTOR);
+
+      CHECK(as_vector<int>(array) == std::vector<int>{10, 20, 30});
+   }
+   SECTION("insert values to back with memory reallocation") {
+      array.add_back(10);
+      array.add_back(20);
+      array.add_back(30);
+      array.add_back(40);
+
+      REQUIRE(array.size() == FACTOR + 1);
+      REQUIRE(array.capacity() == FACTOR + FACTOR);
+
+      CHECK(as_vector<int>(array) == std::vector<int>{10, 20, 30, 40});
+   }
+   SECTION("insert values in the middle of array without memory reallocation") {
+      array.add_back(10);
+      array.add_back(20);
+      CHECK(as_vector<int>(array) == std::vector<int>{10, 20});
+
+      array.add(42, 1);
+      CHECK(as_vector<int>(array) == std::vector<int>{10, 42, 20});
+   }
+
+}
+
