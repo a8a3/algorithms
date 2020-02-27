@@ -205,10 +205,6 @@ template<typename T, size_t E>
 using factor_array = vector_array<T, E, std::multiplies<size_t>>;
 
 // ------------------------------------------------------------------
-
-// p1-> 0 1 2 3 4
-// p2-> 5 6 7 . .
-//
 template<typename T, size_t E>
 class matrix_array : public array<T> {
 public:
@@ -216,8 +212,11 @@ public:
       rows_.push_back(new T[E]);
    }
 
-   // TODO check leaks with valgrind or memory sanitizer
-   ~matrix_array() override {}
+   ~matrix_array() override {
+      for (const auto& row: rows_) {
+         delete []row;
+      }
+   }
 
    size_t size() const override {
       return size_;
@@ -246,43 +245,56 @@ public:
          rows_.push_back(new T[E]);
       }
 
-// 2 3 4  =>  1 2 3
-// . . .  =>  4 . .
-
       const auto row_idx = idx/E;
       const auto col_idx = idx%E;
       auto row = rows_[row_idx];
 
-      auto last = row[E-1];
+      auto last_item = row[E-1];
       move_right(row + col_idx, E - (col_idx + 1)); // move current row items to the right
 
       // move last item to the next row through the all rows
       for (size_t i = row_idx + 1, sz = rows_.size(); i < sz; ++i) {
           auto current_row = rows_[i];
-          auto current_last = current_row[E - 1];
+          const auto current_last_item = current_row[E - 1];
           move_right(current_row, E - 1);
-          current_row[0] = last;
-          last = current_last;
+          current_row[0] = last_item;
+          last_item = current_last_item;
       }
       
       row[col_idx] = item;
       ++size_;
    }
 
-   // TODO
    T remove(size_t idx) override {
       if (idx >= size_) {
          throw std::out_of_range("incorrect index requested");
       }
 
-//      auto& arr = array<T>::arr_;
-//      T result{arr[idx]};
-//
-//      move_left(arr + idx, size_-(idx+1));
-//
-//      --size_;
-//      return result;
-      return T();
+            auto row_idx = idx/E;
+      const auto col_idx = idx%E;
+
+//    1 2 3 =>   2 3 4 =>   3 4 5
+//    4 5 6      5 6 7      6 7 8
+//    7 8 .      8 . .      . . .
+
+      auto target_row = rows_[row_idx];
+      T result{target_row[col_idx]};
+
+      // move target row items to the left
+      move_left(target_row + col_idx, E-(col_idx+1));
+      const auto have_items_in_next_row = [&](){ return (row_idx + 1)*E < size_;};
+
+      while (have_items_in_next_row()) {
+         auto next_row = rows_[row_idx+1];
+         target_row[E-1] = next_row[0];
+         move_left(next_row, E-1);
+
+         target_row = next_row;
+         ++row_idx;
+      }
+
+      --size_;
+      return result;
    }
 
    const T& get(size_t idx) const override {

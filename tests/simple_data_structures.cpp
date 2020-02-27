@@ -24,7 +24,7 @@ std::vector<T> as_vector(const array<T>& array){
 }
 
 // ------------------------------------------------------------------
-TEMPLATE_TEST_CASE("dynamic_arrays_common_tests", "[dynamic_array][template]", (single_array<int>), (vector_array<int, 5>), (factor_array<int, 5>)) {
+TEMPLATE_TEST_CASE("dynamic_arrays_common_tests", "[dynamic_array][template]", (single_array<int>), (vector_array<int, 5>), (factor_array<int, 5>), (matrix_array<int, 5>)) {
    TestType array;
    REQUIRE(array.size() == 0);
 
@@ -246,6 +246,63 @@ TEST_CASE("matrix_array_test", "[matrix_array]") {
 
        array.add(42, 1);
        CHECK(as_vector<int>(array) == std::vector<int>{1, 42, 2, 3, 4, 5, 6, 7});
+   }
+   SECTION("remove values from back") {
+      array.add_back(1);
+      array.add_back(2);
+      array.add_back(3);
+      array.add_back(4);
+      array.add_back(5);
+      array.add_back(6);
+      array.add_back(7);
+      CHECK(as_vector<int>(array) == std::vector<int>{1, 2, 3, 4, 5, 6, 7});
+      CHECK(array.size() == 7);
+
+      CHECK(array.remove(6) == 7);
+      CHECK(array.remove(5) == 6);
+      CHECK(array.remove(4) == 5);
+      CHECK(array.remove(3) == 4);
+      CHECK(array.remove(2) == 3);
+      CHECK(array.remove(1) == 2);
+      CHECK(array.remove(0) == 1);
+
+      CHECK(array.size() == 0);
+   }
+   SECTION("remove values from front") {
+      array.add_back(1);
+      array.add_back(2);
+      array.add_back(3);
+      array.add_back(4);
+      array.add_back(5);
+      array.add_back(6);
+      array.add_back(7);
+      array.add_back(8);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8});
+      CHECK(array.size() == 8);
+
+      CHECK(array.remove(0) == 1);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{2, 3, 4, 5, 6, 7, 8});
+
+      CHECK(array.remove(0) == 2);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{3, 4, 5, 6, 7, 8});
+
+      CHECK(array.remove(0) == 3);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{4, 5, 6, 7, 8});
+
+      CHECK(array.remove(0) == 4);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{5, 6, 7, 8});
+
+      CHECK(array.remove(0) == 5);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{6, 7, 8});
+
+      CHECK(array.remove(0) == 6);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{7, 8});
+
+      CHECK(array.remove(0) == 7);
+      REQUIRE(as_vector<int>(array) == std::vector<int>{8});
+
+      CHECK(array.remove(0) == 8);
+      REQUIRE(array.size() == 0);
    }
 }
 
