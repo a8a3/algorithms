@@ -1,9 +1,7 @@
 
-common
-******
-
 + add benchmarks to algebraic project;
     + install google_benchmark and find it as target;
 
+- try to use templates benchmarks;
 - reconfigure simple_data_structures project;
 - pick common cmake- file chunks and reuse it;
