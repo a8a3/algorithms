@@ -7,14 +7,14 @@
 
 // ------------------------------------------------------------------
 // time O(2^n), space O(2^n)
-uint64_t recursive_fib(uint8_t num) {
+uint64_t recursive_fib(uint64_t num) {
     if (num < 2) return num;
     return recursive_fib(num - 1) + recursive_fib(num - 2);
 }
 
 // ------------------------------------------------------------------
 // time O(n), space O(1)
-uint64_t cycle_fib(uint8_t num) {
+uint64_t cycle_fib(uint64_t num) {
     if (num < 2) return num;
 
     uint64_t current{ 1 };
@@ -30,7 +30,7 @@ uint64_t cycle_fib(uint8_t num) {
 
 // ------------------------------------------------------------------
 // time O(1), space O(1)
-uint64_t golden_ratio_fib(uint8_t num) {
+uint64_t golden_ratio_fib(uint64_t num) {
     if (num < 2) return num;
 
     const double sq = std::sqrt(5);
