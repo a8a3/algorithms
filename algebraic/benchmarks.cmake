@@ -1,4 +1,6 @@
 
+find_package(benchmark REQUIRED)
+
 add_executable(algebraic_benchmarks benchmarks.cpp)
 
 target_link_libraries(algebraic_benchmarks
