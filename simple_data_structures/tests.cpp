@@ -306,3 +306,24 @@ TEST_CASE("matrix_array_test", "[matrix_array]") {
    }
 }
 
+// ------------------------------------------------------------------
+TEST_CASE("multiple_insertions", "[matrix_array]") {
+   constexpr auto FACTOR{1};
+   matrix_array<int, FACTOR> array;
+   REQUIRE(array.size() == 0);
+   REQUIRE(array.capacity() == FACTOR);
+
+   constexpr auto elems_count{4};
+   for (size_t i = elems_count; i--;) {
+      array.add_back(42);
+   }
+
+   REQUIRE(as_vector<int>(array) == std::vector<int>(elems_count, 42));
+   REQUIRE(array.size() == elems_count);
+
+   for (size_t i = elems_count; i--;) {
+      array.remove(array.size()-1);
+   }
+
+   REQUIRE(array.size() == 0);
+}

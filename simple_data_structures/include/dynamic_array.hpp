@@ -43,7 +43,7 @@ class array {
 public:
    array(size_t sz = 0) : capacity_(sz) {}
 
-   virtual size_t size     () const                    = 0;
+   virtual size_t size     () const noexcept           = 0;
    virtual void   add_back (const T& item)             = 0;
    virtual void   add_front(const T& item)             = 0;
    virtual void   add      (const T& item, size_t idx) = 0;
@@ -62,7 +62,7 @@ template<typename T>
 class single_array : public array<T> {
 public:
 
-   size_t size() const override {
+   size_t size() const noexcept override {
       return array<T>::capacity_;
    }
 
@@ -130,7 +130,7 @@ public:
       array<T>::arr_ = new T[array<T>::capacity_];
    }
 
-   size_t size() const override {
+   size_t size() const noexcept override {
       return size_;
    }
 
@@ -218,7 +218,7 @@ public:
       }
    }
 
-   size_t size() const override {
+   size_t size() const noexcept override {
       return size_;
    }
 
@@ -241,7 +241,7 @@ public:
 
       auto& capacity = array<T>::capacity_;
       if (size_ == capacity) {
-         capacity += capacity;
+         capacity += E;
          rows_.push_back(new T[E]);
       }
 
