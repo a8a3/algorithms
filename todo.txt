@@ -5,5 +5,9 @@
 - add benchmarks to simple_data_structures project;
     - try to use templates benchmarks;
 
+- set limit to benchmarks iterations to 128;
+    - set limit as variable;
+    - set range as variable;
+
 - reconfigure simple_data_structures project;
 - pick common cmake- file chunks and reuse it;
