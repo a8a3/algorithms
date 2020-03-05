@@ -308,12 +308,12 @@ TEST_CASE("matrix_array_test", "[matrix_array]") {
 
 // ------------------------------------------------------------------
 TEST_CASE("multiple_insertions", "[matrix_array]") {
-   constexpr auto FACTOR{1};
+   constexpr auto FACTOR{16};
    matrix_array<int, FACTOR> array;
    REQUIRE(array.size() == 0);
    REQUIRE(array.capacity() == FACTOR);
 
-   constexpr auto elems_count{4};
+   constexpr auto elems_count{1'000};
    for (size_t i = elems_count; i--;) {
       array.add_back(42);
    }

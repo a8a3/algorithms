@@ -1,10 +1,37 @@
 
+#import numpy as np
+#import matplotlib as plt
 import json
 
-with open('benchs.json') as json_file:
-    data = json.load(json_file)
+# -----------------------------------------------
+class tests_storage:
+    regexp = r'^(.*?)<(.*)<.*/(\d*)'
+    tests = []
 
-benchmarks = data['benchmarks']
+    def create_test(raw_string):
+        pass
 
-for benchmark in benchmarks:
-    print(benchmark['name'])
+# -----------------------------------------------
+class test:
+    def __init__(self, name):
+        self.name = name
+        self.targets = []
+
+# -----------------------------------------------
+class test_target:
+    def __init__(self, name):
+        self.name = name
+        self.results = []
+
+# -----------------------------------------------
+class test_result:
+    def __init__(self, value, time):
+        self.value = value
+        self.time = time
+
+# todo main
+with open('bench.json') as f:
+    benchs = json.load(f)
+
+for bench in benchs['benchmarks'] :
+    print(bench['name'])

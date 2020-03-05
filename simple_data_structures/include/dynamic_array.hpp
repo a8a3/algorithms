@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -34,7 +35,7 @@ void move_left(T* from, size_t count) {
    }
 }
 
-} // anonymous namespace
+} // namespace
 
 // ------------------------------------------------------------------
 template<typename T>
