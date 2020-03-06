@@ -2,9 +2,17 @@
 
 #include "include/dynamic_array.hpp"
 
-namespace {
-constexpr size_t FACTOR{32};
-} // namespace
+namespace settings {
+constexpr size_t factor{32};
+constexpr size_t iterations{128};
+struct range {
+   constexpr static size_t start{10};
+   constexpr static size_t end  {100};
+   constexpr static size_t mul  {10};
+};
+} // settings
+
+using namespace settings;
 
 // ------------------------------------------------------------------
 template <class TA>
@@ -17,10 +25,10 @@ void BM_back_insertion(benchmark::State& state) {
       }
    }
 }
-BENCHMARK_TEMPLATE(BM_back_insertion, single_array<int>        )->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_back_insertion, vector_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_back_insertion, factor_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_back_insertion, matrix_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
+BENCHMARK_TEMPLATE(BM_back_insertion, single_array<int>        )->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_back_insertion, vector_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_back_insertion, factor_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_back_insertion, matrix_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
 
 // ------------------------------------------------------------------
 template <class TA>
@@ -40,10 +48,10 @@ void BM_back_deletion(benchmark::State& state) {
       }
    }
 }
-BENCHMARK_TEMPLATE(BM_back_deletion, single_array<int>        )->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_back_deletion, vector_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_back_deletion, factor_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_back_deletion, matrix_array<int, FACTOR>)->Iterations(128)->RangeMultiplier(10)->Range(100, 10'000);
+BENCHMARK_TEMPLATE(BM_back_deletion, single_array<int>        )->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_back_deletion, vector_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_back_deletion, factor_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_back_deletion, matrix_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
 
 // ------------------------------------------------------------------
 template <class TA>
@@ -56,10 +64,10 @@ void BM_front_insertion(benchmark::State& state) {
       }
    }
 }
-BENCHMARK_TEMPLATE(BM_front_insertion, single_array<int>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_front_insertion, vector_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_front_insertion, factor_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_front_insertion, matrix_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
+BENCHMARK_TEMPLATE(BM_front_insertion, single_array<int>        )->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_front_insertion, vector_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_front_insertion, factor_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_front_insertion, matrix_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
 
 // ------------------------------------------------------------------
 template <class TA>
@@ -79,10 +87,10 @@ void BM_front_deletion(benchmark::State& state) {
       }
    }
 }
-BENCHMARK_TEMPLATE(BM_front_deletion, single_array<int>        )->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_front_deletion, vector_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_front_deletion, factor_array<int, FACTOR>)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_front_deletion, matrix_array<int, FACTOR>)->Iterations(128)->RangeMultiplier(10)->Range(100, 10'000);
+BENCHMARK_TEMPLATE(BM_front_deletion, single_array<int>        )->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_front_deletion, vector_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_front_deletion, factor_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_front_deletion, matrix_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
 
 // ------------------------------------------------------------------
 template <class TA>
@@ -102,9 +110,9 @@ void BM_get_by_index(benchmark::State& state) {
         }
     }
 }
-BENCHMARK_TEMPLATE(BM_get_by_index, single_array<int>)->Iterations(128)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_get_by_index, vector_array<int, FACTOR>)->Iterations(128)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_get_by_index, factor_array<int, FACTOR>)->Iterations(128)->RangeMultiplier(10)->Range(100, 10'000);
-BENCHMARK_TEMPLATE(BM_get_by_index, matrix_array<int, FACTOR>)->Iterations(128)->RangeMultiplier(10)->Range(100, 10'000);
+BENCHMARK_TEMPLATE(BM_get_by_index, single_array<int>        )->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_get_by_index, vector_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_get_by_index, factor_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
+BENCHMARK_TEMPLATE(BM_get_by_index, matrix_array<int, factor>)->Iterations(iterations)->RangeMultiplier(range::mul)->Range(range::start, range::end);
 
 BENCHMARK_MAIN();

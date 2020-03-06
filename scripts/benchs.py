@@ -2,36 +2,53 @@
 #import numpy as np
 #import matplotlib as plt
 import json
+import re
+
 
 # -----------------------------------------------
-class tests_storage:
-    regexp = r'^(.*?)<(.*)<.*/(\d*)'
-    tests = []
+class TestsStorage:
+    regexp = r'^(.*?)<(.*)<.*>/(\d*)'
+    tests = {}
 
-    def create_test(raw_string):
-        pass
+    @staticmethod
+    def create_test(raw_name, raw_time):
+        test = re.search(TestsStorage.regexp, raw_name)
+        print(test.group(1) + "->" + test.group(2) + "->" + test.group(3))
+        test_name = test.group(1);
+        target_name = test.group(2)
+        test_value = test.group(3)
+        TestsStorage.tests[test_name].targets[target_name] = TestResult(test_value, raw_time)
+
 
 # -----------------------------------------------
-class test:
+class Test:
     def __init__(self, name):
-        self.name = name
-        self.targets = []
+        # self.name = name
+        self.targets = {}
+
 
 # -----------------------------------------------
-class test_target:
+class TestTarget:
     def __init__(self, name):
-        self.name = name
+        # self.name = name
         self.results = []
 
+
 # -----------------------------------------------
-class test_result:
+class TestResult:
     def __init__(self, value, time):
         self.value = value
         self.time = time
 
-# todo main
-with open('bench.json') as f:
-    benchs = json.load(f)
 
-for bench in benchs['benchmarks'] :
-    print(bench['name'])
+# -----------------------------------------------
+def main():
+    with open('benchs.json') as f:
+        benchs = json.load(f)
+
+    for bench in benchs['benchmarks']:
+        TestsStorage.create_test(bench['name'], bench['real_time'])
+
+
+if __name__ == "__main__":
+    main()

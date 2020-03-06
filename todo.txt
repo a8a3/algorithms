@@ -2,12 +2,15 @@
 + add benchmarks to algebraic project;
     + install google_benchmark and find it as target;
 
-- add benchmarks to simple_data_structures project;
-    - try to use templates benchmarks;
++ add benchmarks to simple_data_structures project;
+    + try to use templates benchmarks;
 
-- set limit to benchmarks iterations to 128;
-    - set limit as variable;
-    - set range as variable;
++ set limit to benchmarks iterations to 128;
+    + set limit as variable;
+    + set range as variable;
 
-- reconfigure simple_data_structures project;
++ reconfigure simple_data_structures project;
+
+- parse benchmarks out json- file and plot it with python;
+
 - pick common cmake- file chunks and reuse it;
