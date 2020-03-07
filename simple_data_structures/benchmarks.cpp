@@ -3,12 +3,12 @@
 #include "include/dynamic_array.hpp"
 
 namespace settings {
-constexpr size_t factor{32};
-constexpr size_t iterations{128};
+constexpr size_t factor{10};
+constexpr size_t iterations{32};
 struct range {
-   constexpr static size_t start{10};
-   constexpr static size_t end  {100};
-   constexpr static size_t mul  {10};
+   constexpr static size_t start{2};
+   constexpr static size_t end  {4096};
+   constexpr static size_t mul  {2};
 };
 } // settings
 
