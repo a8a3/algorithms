@@ -10,7 +10,14 @@
     + set range as variable;
 
 + reconfigure simple_data_structures project;
++ parse benchmarks out json- file and plot it with python;
 
-- parse benchmarks out json- file and plot it with python;
 
+heap
+----
+  - heap on vector -> heap on dynamic_array;
+  - priority_queue on heap;
+
+cmake
+-----
 - pick common cmake- file chunks and reuse it;

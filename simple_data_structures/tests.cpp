@@ -1,10 +1,12 @@
 #define CATCH_CONFIG_MAIN   // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
 #include <dynamic_array.hpp>
+#include <heap.hpp>
 
 template<typename T>
 void print(const array<T>& array) {
@@ -326,4 +328,90 @@ TEST_CASE("multiple_insertions", "[matrix_array]") {
    }
 
    REQUIRE(array.size() == 0);
+}
+
+
+
+// ------------------------------------------------------------------
+TEST_CASE("auxiliary_functions_test", "[heap]") {
+   CHECK(parent(1) == 0);
+   CHECK(parent(2) == 0);
+
+   CHECK(parent(3) == 1);
+   CHECK(parent(4) == 1);
+
+   CHECK(parent(5) == 2);
+   CHECK(parent(6) == 2);
+
+   CHECK(left (0) == 1);
+   CHECK(right(0) == 2);
+
+   CHECK(left (1) == 3);
+   CHECK(right(1) == 4);
+
+   CHECK(left (2) == 5);
+   CHECK(right(2) == 6);
+
+   SECTION("is_it_a_heap") {
+      const std::vector<int> heap0{100};
+      CHECK(is_heap(heap0));
+
+      const std::vector<int> heap1{100, 90};
+      CHECK(is_heap(heap1));
+
+      const std::vector<int> heap2{100, 90, 80};
+      CHECK(is_heap(heap2));
+
+      const std::vector<int> heap3{100, 90, 80, 85, 84, 77, 76, 84, 83, 80, 79, 75, 74, 70, 69};
+      CHECK(is_heap(heap3));
+
+      const std::vector<int> no_heap0{100, 110};
+      CHECK(!is_heap(no_heap0));
+
+      const std::vector<int> no_heap1{100, 90, 110};
+      CHECK(!is_heap(no_heap1));
+
+      const std::vector<int> no_heap2{100, 90, 80, 85, 84, 77, 76, 84, 83, 80, 79, 110, 74, 70, 69};
+      CHECK(!is_heap(no_heap2));
+   }
+
+   heap h;
+
+//   const auto print = [](const auto& v){
+//      for(const auto& i: v) {
+//         std::cerr << i << ' ';
+//      }
+//      std::cerr << '\n';
+//   };
+
+   SECTION("build_heap") {
+      h.push(10);
+      h.push(20);
+      h.push(30);
+      h.push(40);
+      h.push(50);
+      h.push(60);
+      h.push(70);
+      CHECK(is_heap(h.storage()));
+
+      for (int i = 0; i > 100; ++i) {
+         h.push(i);
+      }
+
+      CHECK(is_heap(h.storage()));
+   }
+   SECTION("extract_from_heap") {
+      std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      for(const auto& i: v) {
+         h.push(i);
+      }
+      REQUIRE(is_heap(h.storage()));
+
+      std::reverse(v.begin(), v.end());
+      for(const auto& i: v) {
+         CHECK(h.top() == i);
+         h.pop();
+         REQUIRE(is_heap(h.storage()));
+      }
+   }
 }
