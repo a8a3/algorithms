@@ -9,15 +9,15 @@
 #include <heap.hpp>
 
 template<typename T>
-void print(const array<T>& array) {
+void print(const T& array) {
    for (size_t i = 0, sz = array.size(); i < sz; ++i) {
       std::cerr << array[i] << ' ';
    }
    std::cerr << '\n';
 }
 
-template <typename T>
-std::vector<T> as_vector(const array<T>& array){
+template <typename T, class A>
+std::vector<T> as_vector(const A& array){
    std::vector<T> result(array.size());
    for (size_t i = 0, sz = array.size(); i < sz; ++i) {
       result[i] = array.get(i);
@@ -98,6 +98,23 @@ TEMPLATE_TEST_CASE("dynamic_arrays_common_tests", "[dynamic_array][template]", (
       CHECK(array.get(3) == 40);
 
       CHECK_THROWS_WITH(array.get(4), "incorrect index requested");
+   }
+   SECTION("access by idx") {
+      array.add(10, 0);
+      array.add(20, 1);
+      array.add(30, 2);
+
+      CHECK(array[0] == 10);
+      CHECK(array[1] == 20);
+      CHECK(array[2] == 30);
+
+      array[0] = 100;
+      array[1] = 200;
+      array[2] = 300;
+
+      CHECK(array[0] == 100);
+      CHECK(array[1] == 200);
+      CHECK(array[2] == 300);
    }
 }
 
@@ -375,7 +392,8 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
       CHECK(!is_heap(no_heap2));
    }
 
-   heap h;
+   using storage = vector_array<int, 32>;
+   heap<storage> h;
 
 //   const auto print = [](const auto& v){
 //      for(const auto& i: v) {

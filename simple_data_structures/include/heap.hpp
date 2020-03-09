@@ -2,13 +2,6 @@
 
 #include "dynamic_array.hpp"
 
-//       9
-//    5     8
-//   4 3   6 2
-//
-//          0 1 2 3 4 5 6
-//  heap -> 9 5 8 4 3 6 2
-
 // ------------------------------------------------------------------
 constexpr size_t parent(size_t child) {
    return (child - 1) / 2;
@@ -28,7 +21,8 @@ namespace {
 
 // TODO check implementation on algoexpert!!
 // ------------------------------------------------------------------
-bool is_heap(const std::vector<int>& storage, size_t p, size_t sz) {
+template<typename T>
+bool is_heap(const T& storage, size_t p, size_t sz) {
    const auto l = left(p);
    if (l >= sz) {
       return true;
@@ -50,33 +44,36 @@ bool is_heap(const std::vector<int>& storage, size_t p, size_t sz) {
 } // namespace
 
 // ------------------------------------------------------------------
-bool is_heap(const std::vector<int>& storage) {
+template<typename T>
+bool is_heap(const T& storage) {
    return is_heap(storage, 0, storage.size());
 }
 
 // ------------------------------------------------------------------
+template<typename T>
 class heap {
 public:
    heap() {}
 
    void push(int val) {
-      storage_.push_back(val);
+      storage_.add_back(val);
       const auto idx = storage_.size()-1;
       sift_up(idx);
    }
 
    void pop() {
-      if (storage_.empty()) {
+      if (::empty(storage_)) {
          return;
       }
 
-      std::swap(storage_.front(), storage_.back());
-      storage_.erase(std::prev(storage_.end()));
+      const auto last_idx = storage_.size() - 1;
+      std::swap(storage_[0], storage_[last_idx]);
+      storage_.remove(last_idx);
       sift_down(0);
    }
 
    int top() const {
-      return storage_.empty() ? 0 : storage_.front();
+      return storage_.get(0);
    }
 
    size_t size() const noexcept {
@@ -84,15 +81,15 @@ public:
    }
 
    bool empty() const noexcept {
-      return size() == 0;
+      return ::empty(storage_);
    }
 
-   const std::vector<int>& storage() const {
+   const T& storage() const {
       return storage_;
    }
 
 private:
-   std::vector<int> storage_;
+   T storage_;
 
    void sift_up(size_t idx) {
       if (idx == 0) {

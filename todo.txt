@@ -15,7 +15,9 @@
 
 heap
 ----
-  - heap on vector -> heap on dynamic_array;
+  + heap on vector -> heap on dynamic_array;
+    heap is on vector_array now.
+
   - priority_queue on heap;
 
 cmake

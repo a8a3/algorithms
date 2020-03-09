@@ -37,50 +37,32 @@ void move_left(T* from, size_t count) {
 
 } // namespace
 
-// ------------------------------------------------------------------
-template<typename T>
-class array {
-
-public:
-   array(size_t sz = 0) : capacity_(sz) {}
-
-   virtual size_t size     () const noexcept           = 0;
-   virtual void   add_back (const T& item)             = 0;
-   virtual void   add_front(const T& item)             = 0;
-   virtual void   add      (const T& item, size_t idx) = 0;
-   virtual T      remove   (size_t idx)                = 0;
-
-   virtual ~array() {delete []arr_;}
-
-   virtual const T& get(size_t idx) const              = 0;
-protected:
-    T* arr_{ nullptr };
-    size_t capacity_;
-};
 
 // ------------------------------------------------------------------
 template<typename T>
-class single_array : public array<T> {
+class single_array {
 public:
 
-   size_t size() const noexcept override {
-      return array<T>::capacity_;
+   ~single_array() {delete []arr_;}
+
+   size_t size() const noexcept {
+      return size_;
    }
 
-   void add_back(const T& item) override {
-      add(item, array<T>::capacity_);
+   void add_back(const T& item) {
+      add(item, size_);
    }
 
-   void add_front(const T& item) override {
+   void add_front(const T& item) {
       add(item, 0);
    }
 
-   void add(const T& item, size_t idx) override {
-      auto& sz = array<T>::capacity_;
+   void add(const T& item, size_t idx) {
+      auto& sz = size_;
       if (idx > sz) {
          throw std::out_of_range("incorrect index requested");
       }
-      auto& arr = array<T>::arr_;
+      auto& arr = arr_;
 
       T* buf = new T[sz + 1];
       buf[idx] = item;
@@ -93,111 +75,117 @@ public:
       ++sz;
     }
 
-    T remove(size_t idx) override {
-       auto& sz = array<T>::capacity_;
-
-       if (idx >= sz) {
+    T remove(size_t idx) {
+       if (idx >= size_) {
           throw std::out_of_range("incorrect index requested");
        }
 
-       auto& arr = array<T>::arr_;
+       T result{arr_[idx]};
+       T* buf = new T[size_ - 1];
 
-       T result{arr[idx]};
-       T* buf = new T[sz - 1];
+       copy_range(arr_, buf, idx);
+       copy_range(arr_+(idx+1), buf+idx, size_ - (idx+1));
 
-       copy_range(arr, buf, idx);
-       copy_range(arr+(idx+1), buf+idx, sz-(idx+1));
-
-       delete []arr;
-       arr = buf;
-       --sz;
+       delete []arr_;
+       arr_ = buf;
+       --size_;
        return result;
     }
 
-    const T& get(size_t idx) const override {
-       if (idx >= array<T>::capacity_) {
+    const T& get(size_t idx) const {
+       if (idx >= size_) {
           throw std::out_of_range("incorrect index requested");
        }
-       return array<T>::arr_[idx];
+       return arr_[idx];
     }
+
+          T& operator[](std::size_t idx)       { return arr_[idx]; }
+    const T& operator[](std::size_t idx) const { return arr_[idx]; }
+
+private:
+    T*     arr_ {nullptr};
+    size_t size_{0};
 };
 
 // ------------------------------------------------------------------
 template <typename T, size_t E = 8, typename AllocPolicy = std::plus<size_t>>
-class vector_array : public array<T> {
-
+class vector_array {
 public:
-   vector_array() : array<T>(E) {
-      array<T>::arr_ = new T[array<T>::capacity_];
+   vector_array() : capacity_(E) {
+      arr_ = new T[capacity_];
    }
 
-   size_t size() const noexcept override {
+   size_t size() const noexcept {
       return size_;
    }
 
    size_t capacity() const {
-      return array<T>::capacity_;
+      return capacity_;
    }
 
-   void add_back(const T& item) override {
+   void add_back(const T& item) {
       add(item, size_);
    }
 
-   void add_front(const T& item) override {
+   void add_front(const T& item) {
       add(item, 0);
    }
 
-   void add(const T& item, size_t idx) override {
+   void add(const T& item, size_t idx) {
       if (idx > size_) {
          throw std::out_of_range("incorrect index requested");
       }
-      auto capacity = array<T>::capacity_;
-      auto buf = array<T>::arr_;
+      auto capacity = capacity_;
+      auto buf = arr_;
 
       if (size_ == capacity) {
          capacity = AllocPolicy()(capacity, E);
          buf = new T[capacity];
       }
-      const auto reallocation_happened = buf != array<T>::arr_;
+      const auto reallocation_happened = buf != arr_;
 
       if (reallocation_happened) {
-         copy_range(array<T>::arr_, buf, idx);
-         copy_range(array<T>::arr_ + idx, buf + (idx+1), size_-idx);
+         copy_range(arr_, buf, idx);
+         copy_range(arr_ + idx, buf + (idx+1), size_-idx);
       } else {
          move_right(buf+idx, size_ - idx);
       }
       buf[idx] = item;
 
       if (reallocation_happened) {
-         delete []array<T>::arr_;
-         array<T>::arr_ = buf;
-         array<T>::capacity_ = capacity;
+         delete []arr_;
+         arr_ = buf;
+         capacity_ = capacity;
       }
       ++size_;
    }
 
-   T remove(size_t idx) override {
+   T remove(size_t idx) {
       if (idx >= size_) {
          throw std::out_of_range("incorrect index requested");
       }
 
-      auto& arr = array<T>::arr_;
-      T result{arr[idx]};
+      T result{arr_[idx]};
 
-      move_left(arr + idx, size_-(idx+1));
+      move_left(arr_ + idx, size_-(idx+1));
 
       --size_;
       return result;
    }
 
-   const T& get(size_t idx) const override {
+   const T& get(size_t idx) const {
       if (idx >= size_) {
          throw std::out_of_range("incorrect index requested");
       }
-      return array<T>::arr_[idx];
+      return arr_[idx];
    }
 
+         T& operator[](std::size_t idx)       { return arr_[idx]; }
+   const T& operator[](std::size_t idx) const { return arr_[idx]; }
+
 private:
+   T* arr_{ nullptr };
+   size_t capacity_;
    size_t size_{0};
 };
 
@@ -207,40 +195,40 @@ using factor_array = vector_array<T, E, std::multiplies<size_t>>;
 
 // ------------------------------------------------------------------
 template<typename T, size_t E>
-class matrix_array : public array<T> {
+class matrix_array {
 public:
-   matrix_array() : array<T>(E) {
+   matrix_array() : capacity_(E) {
       rows_.push_back(new T[E]);
    }
 
-   ~matrix_array() override {
+   ~matrix_array() {
       for (const auto& row: rows_) {
          delete []row;
       }
    }
 
-   size_t size() const noexcept override {
+   size_t size() const noexcept {
       return size_;
    }
 
    size_t capacity() const {
-      return array<T>::capacity_;
+      return capacity_;
    }
 
-   void add_back(const T& item) override {
+   void add_back(const T& item) {
       add(item, size_);
    }
 
-   void add_front(const T& item) override {
+   void add_front(const T& item) {
       add(item, 0);
    }
 
-   void add(const T& item, size_t idx) override {
+   void add(const T& item, size_t idx) {
       if (idx > size_) {
          throw std::out_of_range("incorrect index requested");
       }
 
-      auto& capacity = array<T>::capacity_;
+      auto& capacity = capacity_;
       if (size_ == capacity) {
          capacity += E;
          rows_.push_back(new T[E]);
@@ -266,17 +254,13 @@ public:
       ++size_;
    }
 
-   T remove(size_t idx) override {
+   T remove(size_t idx) {
       if (idx >= size_) {
          throw std::out_of_range("incorrect index requested");
       }
 
             auto row_idx = idx/E;
       const auto col_idx = idx%E;
-
-//    1 2 3 =>   2 3 4 =>   3 4 5
-//    4 5 6      5 6 7      6 7 8
-//    7 8 .      8 . .      . . .
 
       auto target_row = rows_[row_idx];
       T result{target_row[col_idx]};
@@ -298,16 +282,24 @@ public:
       return result;
    }
 
-   const T& get(size_t idx) const override {
+   const T& get(size_t idx) const {
       if (idx >= size_) {
          throw std::out_of_range("incorrect index requested");
       }
       return rows_[idx/E][idx%E];
    }
 
+         T& operator[](std::size_t idx)       { return rows_[idx/E][idx%E]; }
+   const T& operator[](std::size_t idx) const { return rows_[idx/E][idx%E]; }
+
 private:
+   size_t capacity_;
    size_t size_{0};
    std::vector<T*> rows_;
 };
 
-
+// ------------------------------------------------------------------
+template<typename T>
+bool empty(const T& storage) {
+   return storage.size() == 0;
+}
