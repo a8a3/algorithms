@@ -3,10 +3,12 @@
 
 #include <algorithm>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include <dynamic_array.hpp>
 #include <heap.hpp>
+#include <priority_queue.hpp>
 
 template<typename T>
 void print(const T& array) {
@@ -347,8 +349,6 @@ TEST_CASE("multiple_insertions", "[matrix_array]") {
    REQUIRE(array.size() == 0);
 }
 
-
-
 // ------------------------------------------------------------------
 TEST_CASE("auxiliary_functions_test", "[heap]") {
    CHECK(parent(1) == 0);
@@ -392,15 +392,7 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
       CHECK(!is_heap(no_heap2));
    }
 
-   using storage = vector_array<int, 32>;
-   heap<storage> h;
-
-//   const auto print = [](const auto& v){
-//      for(const auto& i: v) {
-//         std::cerr << i << ' ';
-//      }
-//      std::cerr << '\n';
-//   };
+   heap<int> h;
 
    SECTION("build_heap") {
       h.push(10);
@@ -412,7 +404,7 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
       h.push(70);
       CHECK(is_heap(h.storage()));
 
-      for (int i = 0; i > 100; ++i) {
+      for (int i = 0; i < 100; ++i) {
          h.push(i);
       }
 
@@ -445,4 +437,69 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
       }
       CHECK(h.empty());
    }
+}
+
+// ------------------------------------------------------------------
+struct data {
+   explicit data(int value = 0, const std::string& str = "") : value_(value), str_(str) {}
+
+
+   int value_{0};
+   std::string str_;
+
+   bool operator <  (const data& rhs) const noexcept {return value_ < rhs.value_;}
+   bool operator >  (const data& rhs) const noexcept {return rhs.value_ < value_;}
+   bool operator <= (const data& rhs) const noexcept {return !(value_ > rhs.value_);}
+   bool operator >= (const data& rhs) const noexcept {return !(value_ < rhs.value_);}
+
+   bool operator == (const data& rhs) const noexcept {return !(value_ > rhs.value_) && !(value_ < rhs.value_);}
+};
+
+// ------------------------------------------------------------------
+TEST_CASE("enque, dequeue, size", "[priority_queue]") {
+   priority_queue<data> pq;
+   pq.enqueue(data{100});
+   pq.enqueue(data{0});
+   pq.enqueue(data{200});
+   pq.enqueue(data{10});
+   pq.enqueue(data{0});
+   pq.enqueue(data{50});
+   REQUIRE(pq.size() == 6);
+
+   CHECK(pq.dequeue() == data{200});
+   CHECK(pq.dequeue() == data{100});
+   CHECK(pq.dequeue() == data{50});
+   CHECK(pq.dequeue() == data{10});
+   CHECK(pq.dequeue() == data{0});
+   CHECK(pq.dequeue() == data{0});
+
+   REQUIRE(pq.empty());
+}
+
+// ------------------------------------------------------------------
+TEST_CASE("stable enque, dequeue, size", "[priority_queue]") {
+   stable_priority_queue<data, 32> pq;
+   pq.enqueue(data{100, "one"});
+   pq.enqueue(data{200});
+   pq.enqueue(data{100, "two"});
+   pq.enqueue(data{300});
+   pq.enqueue(data{100, "three"});
+   REQUIRE(pq.size() == 5);
+
+   CHECK(pq.dequeue() == data{300});
+   CHECK(pq.dequeue() == data{200});
+
+   const auto one = pq.dequeue();
+   CHECK(one.value_ == 100);
+   CHECK(one.str_ == "one");
+
+   const auto two = pq.dequeue();
+   CHECK(two.value_ == 100);
+   CHECK(two.str_ == "two");
+
+   const auto three = pq.dequeue();
+   CHECK(three.value_ == 100);
+   CHECK(three.str_ == "three");
+
+   REQUIRE(pq.empty());
 }

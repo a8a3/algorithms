@@ -50,12 +50,10 @@ bool is_heap(const T& storage) {
 }
 
 // ------------------------------------------------------------------
-template<typename T>
+template<typename T, typename Tstorage = vector_array<T, 32>>
 class heap {
 public:
-   heap() {}
-
-   void push(int val) {
+   void push(const T& val) {
       storage_.add_back(val);
       const auto idx = storage_.size()-1;
       sift_up(idx);
@@ -72,7 +70,7 @@ public:
       sift_down(0);
    }
 
-   int top() const {
+   T top() const {
       return storage_.get(0);
    }
 
@@ -84,12 +82,12 @@ public:
       return ::empty(storage_);
    }
 
-   const T& storage() const {
+   const Tstorage& storage() const {
       return storage_;
    }
 
 private:
-   T storage_;
+   Tstorage storage_;
 
    void sift_up(size_t idx) {
       if (idx == 0) {
