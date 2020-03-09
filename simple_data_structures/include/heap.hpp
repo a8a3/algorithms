@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include "dynamic_array.hpp"
 
 //       9
 //    5     8
@@ -66,17 +66,25 @@ public:
    }
 
    void pop() {
-      if (storage_.size() < 2) {
+      if (storage_.empty()) {
          return;
       }
+
       std::swap(storage_.front(), storage_.back());
       storage_.erase(std::prev(storage_.end()));
-
       sift_down(0);
    }
 
    int top() const {
       return storage_.empty() ? 0 : storage_.front();
+   }
+
+   size_t size() const noexcept {
+      return storage_.size();
+   }
+
+   bool empty() const noexcept {
+      return size() == 0;
    }
 
    const std::vector<int>& storage() const {

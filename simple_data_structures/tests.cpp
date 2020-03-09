@@ -414,4 +414,17 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
          REQUIRE(is_heap(h.storage()));
       }
    }
+   SECTION("heap_size") {
+      std::vector<int> v{1, 2, 3, 1, 2, 3};
+
+      for(const auto& i: v) {
+         h.push(i);
+      }
+      CHECK(h.size() == v.size());
+
+      for(size_t i = 0, sz = v.size(); i < sz; ++i){
+         h.pop();
+      }
+      CHECK(h.empty());
+   }
 }
