@@ -1,4 +1,5 @@
-
+benchmarks
+----------
 + add benchmarks to algebraic project;
     + install google_benchmark and find it as target;
 
@@ -12,13 +13,13 @@
 + reconfigure simple_data_structures project;
 + parse benchmarks out json- file and plot it with python;
 
-
 heap
 ----
-  + heap on vector -> heap on dynamic_array;
-    heap is on vector_array now.
++ heap on vector -> heap on dynamic_array;
+heap is on vector_array now.
 
-  - priority_queue on heap;
++ priority_queue on heap;
++ stable priority queue on vector;
 
 cmake
 -----
