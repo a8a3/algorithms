@@ -393,8 +393,7 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
    }
 
    heap<int> h;
-
-   SECTION("build_heap") {
+   SECTION("fill_heap") {
       h.push(10);
       h.push(20);
       h.push(30);
@@ -436,6 +435,18 @@ TEST_CASE("auxiliary_functions_test", "[heap]") {
          h.pop();
       }
       CHECK(h.empty());
+   }
+
+   SECTION("build heap on dynamic array") {
+      vector_array<int, 1> arr;
+      arr.add_back(0);
+      arr.add_back(1);
+      arr.add_back(2);
+      CHECK(as_vector<int>(arr) == std::vector<int>{0, 1, 2});
+
+      heap<int, decltype(arr)> built_heap(arr);
+      REQUIRE_FALSE(built_heap.empty());
+      REQUIRE(is_heap(built_heap.storage()));
    }
 }
 

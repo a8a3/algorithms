@@ -13,7 +13,7 @@ void copy_range(const T* src, T* dst, size_t size) {
    }
 
    for (size_t i = 0; i < size; ++i) {
-      *(dst + i) = *(src + i);
+      dst[i] = src[i];
    }
 }
 
@@ -42,6 +42,24 @@ void move_left(T* from, size_t count) {
 template<typename T>
 class single_array {
 public:
+
+   single_array() = default;
+
+   single_array(const single_array& other) {
+      *this = other;
+   }
+
+   single_array&operator=(const single_array& other) {
+      if (&other == this) {
+         return *this;
+      }
+
+      delete[] arr_;
+      arr_ = new T[other.size_];
+      size_ = other.size_;
+      copy_range(other.arr_, arr_, other.size_);
+      return *this;
+   }
 
    ~single_array() {delete []arr_;}
 
@@ -114,6 +132,25 @@ public:
    vector_array() : capacity_(E) {
       arr_ = new T[capacity_];
    }
+
+   vector_array(const vector_array& other) {
+      *this = other;
+   }
+
+   vector_array& operator= (const vector_array& other) {
+      if (&other == this) {
+         return *this;
+      }
+
+      delete []arr_;
+      arr_ = new T[other.size_];
+      size_ = other.size_;
+
+      copy_range(other.arr_, arr_, other.size_);
+      return *this;
+   }
+
+   ~vector_array() {delete []arr_;}
 
    size_t size() const noexcept {
       return size_;
@@ -199,6 +236,32 @@ class matrix_array {
 public:
    matrix_array() : capacity_(E) {
       rows_.push_back(new T[E]);
+   }
+
+   matrix_array(const matrix_array& other) {
+      *this = other;
+   }
+
+   matrix_array& operator=(const matrix_array& other) {
+      if (this == &other) {
+         return *this;
+      }
+
+      for (const auto& row: rows_) {
+         delete []row;
+      }
+      rows_.clear();
+      rows_.reserve(other.rows_.size());
+
+      for (const auto& other_row: other.rows_) {
+         T* row = new T[E];
+         copy_range(other_row, row, E);
+         rows_.push_back(row);
+      }
+      size_ = other.size_;
+      capacity_ = other.capacity_;
+
+      return *this;
    }
 
    ~matrix_array() {

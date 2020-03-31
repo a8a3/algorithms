@@ -8,6 +8,11 @@ constexpr size_t parent(size_t child) {
 }
 
 // ------------------------------------------------------------------
+constexpr size_t last_parent_idx(size_t sz) {
+   return sz/2 -1;
+}
+
+// ------------------------------------------------------------------
 constexpr size_t left(size_t parent) {
    return parent * 2 + 1;
 }
@@ -19,7 +24,6 @@ constexpr size_t right(size_t parent) {
 
 namespace {
 
-// TODO check implementation on algoexpert!!
 // ------------------------------------------------------------------
 template<typename T>
 bool is_heap(const T& storage, size_t p, size_t sz) {
@@ -53,6 +57,37 @@ bool is_heap(const T& storage) {
 template<typename T, typename Tstorage = vector_array<T, 32>>
 class heap {
 public:
+
+   heap() = default;
+   explicit heap(const Tstorage& src) : storage_(src) {
+      if (storage_.size() < 2) return;
+
+      int parent_idx = last_parent_idx(storage_.size());
+
+      while(parent_idx >= 0) {
+         sift_down(parent_idx);
+         --parent_idx;
+      }
+   }
+
+   // too much overhead for sort benchmarking
+   template <size_t N>
+   explicit heap(const T (&src)[N]) {
+      const auto sz = sizeof(src) / sizeof(src[0]);
+      if (sz < 2) return;
+
+      for (const auto i: src) {
+         storage_.add_back(i);
+      }
+
+      int parent_idx = last_parent_idx(storage_.size());
+
+      while(parent_idx >= 0) {
+         sift_down(parent_idx);
+         --parent_idx;
+      }
+   }
+
    void push(const T& val) {
       storage_.add_back(val);
       const auto idx = storage_.size()-1;

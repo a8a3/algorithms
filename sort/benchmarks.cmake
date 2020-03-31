@@ -4,6 +4,10 @@ find_package(benchmark REQUIRED)
 
 add_executable(${TARGET_NAME} benchmarks.cpp)
 
+target_include_directories(${TARGET_NAME}
+     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../tests/include
+)
+
 target_link_libraries(${TARGET_NAME}
      PRIVATE benchmark::benchmark
 )

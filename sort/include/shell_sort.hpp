@@ -3,11 +3,13 @@
 #include <algorithm>
 #include <iterator>
 
+namespace shell {
 // ------------------------------------------------------------------
-void swap(int* lhs, int* rhs) {
+void swap(int *lhs, int *rhs) {
    int tmp = *lhs;
    *lhs = *rhs;
    *rhs = tmp;
+}
 }
 
 // ------------------------------------------------------------------
@@ -86,7 +88,7 @@ void shell_sort(int* arr, size_t sz) {
          int* r = fwd;
 
          while (r > arr && *r < *(r-gap)) {
-            swap(r, r-gap);
+            shell::swap(r, r-gap);
             r -= gap;
          }
          fwd += gap;
