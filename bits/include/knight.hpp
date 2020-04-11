@@ -1,7 +1,7 @@
 #pragma once
 
 // ------------------------------------------------------------------
-uint64_t get_knight_turns_mask(uint8_t idx) {
+uint64_t get_knight_moves_mask(uint8_t idx) {
 #if 0
 
 8 * * * * * * * *

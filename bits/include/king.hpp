@@ -1,7 +1,7 @@
 #pragma once
 
 // ------------------------------------------------------------------
-uint64_t get_king_turns_mask(uint8_t idx) {
+uint64_t get_king_moves_mask(uint8_t idx) {
 #if 0
 
 lu u ru
