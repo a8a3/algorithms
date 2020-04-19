@@ -2,14 +2,7 @@
 
 #include <iostream>
 
-// ----------------------------------------------
-namespace {
-void swap(int *a, int *b) {
-   int tmp = *a;
-   *a = *b;
-   *b = tmp;
-}
-} // namespace
+#include <swap.hpp>
 
 
 // ----------------------------------------------
@@ -18,14 +11,14 @@ void naive_heap_sort(int* arr, size_t sz) {
    const auto sift_up = [](int* arr, size_t sz) {
       for (size_t i = 1; i < sz; ++i) {
          if (*(arr + i) > *arr) {
-            swap(arr+i, arr);
+            utils::swap(arr+i, arr);
          }
       }
    };
 
    for(size_t i = 0; i < sz; ++i) {
       sift_up(arr, sz - i);
-      swap(arr, arr + (sz-1) - i);
+      utils::swap(arr, arr + (sz-1) - i);
    }
 }
 
@@ -42,7 +35,7 @@ class heap_sort{
 
       if (max == idx) return;
 
-      swap(arr + idx, arr + max);
+      utils::swap(arr + idx, arr + max);
       sift_down(max, arr, sz);
    };
 
@@ -62,7 +55,7 @@ public:
 
       // pick top and rebuild heap
       for(size_t i = 0; i < sz - 1; ++i) {
-         swap(arr, arr + sz-(i+1) );
+         utils::swap(arr, arr + sz-(i+1) );
          sift_down(0, arr, sz-(i+1));
       }
    }

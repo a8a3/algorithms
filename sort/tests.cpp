@@ -1,11 +1,18 @@
 #define CATCH_CONFIG_MAIN   // This tells Catch to provide a main() - only do this in one cpp file
 
 #include <catch.hpp>
+
+#include <vector>
+
+#include <external_sort.hpp>
+#include <file.hpp>
 #include <heap_sort.hpp>
 #include <insertion_sort.hpp>
+#include <merge_sort.hpp>
+#include <quick_sort.hpp>
 #include <shell_sort.hpp>
 #include <shuffle.hpp>
-#include <vector>
+
 
 // ------------------------------------------------------------------
 TEST_CASE("insertion", "[sort]") {
@@ -110,7 +117,7 @@ TEST_CASE("naive_heap_sort", "[sort]") {
 }
 
 // ------------------------------------------------------------------
-TEST_CASE("heap_sort", "[sort]") {
+TEMPLATE_TEST_CASE("large int array sort", "[sort][template]", heap_sort, merge_sort, quick_sort) {
    constexpr auto sz = 10'000;
    std::unique_ptr<int[]> arr(new int[sz]);
    std::iota(arr.get(), arr.get() + sz, 0);
@@ -120,12 +127,12 @@ TEST_CASE("heap_sort", "[sort]") {
    SECTION("shuffled array") {
       make_shuffle(arr.get(), sz);
       CHECK_FALSE(std::is_sorted(arr.get(), arr.get()+sz));
-      heap_sort::sort(arr.get(), sz);
+      TestType::sort(arr.get(), sz);
       CHECK(std::is_sorted(arr.get(), arr.get()+sz));
    }
 
    SECTION("ascending sorted array") {
-      heap_sort::sort(arr.get(), sz);
+      TestType::sort(arr.get(), sz);
       CHECK(std::is_sorted(arr.get(), arr.get()+sz));
    }
 
@@ -133,8 +140,39 @@ TEST_CASE("heap_sort", "[sort]") {
       std::reverse(arr.get(), arr.get()+sz);
       CHECK_FALSE(std::is_sorted(arr.get(), arr.get()+sz));
 
-      heap_sort::sort(arr.get(), sz);
+      TestType::sort(arr.get(), sz);
       CHECK(std::is_sorted(arr.get(), arr.get()+sz));
    }
 }
 
+// ------------------------------------------------------------------
+TEST_CASE("test file creation", "[file_test]") {
+   SECTION("file creation") {
+      constexpr auto shuffled_file_name = "shuffled.bin";
+      constexpr auto digits_count = 32;
+      constexpr auto chunk = 8;
+
+      create_shuffled_binary_file(shuffled_file_name, digits_count, digits_count);
+      print_file_stuff(shuffled_file_name, chunk);
+
+//    CHECK_FALSE(file::is_file_sorted(shuffled_file_name, chunk_sz));
+      const auto sorted_file_name = sort_file(shuffled_file_name, chunk);
+      print_file_stuff(sorted_file_name, chunk);
+//    CHECK(file::is_file_sorted(res.c_str(), chunk_sz));
+
+   }
+
+   SECTION("file name generation") {
+      CHECK(generate_file_name(  1) == std::string(  "1.bin"));
+      CHECK(generate_file_name(128) == std::string("128.bin"));
+   }
+
+   SECTION("merge algorithm") {
+      std::vector<file::chunk_t> chunks(1'000);
+      for (const auto& chunk: chunks) {
+         file::apply_chunk(chunk);
+      }
+      file::print(file::stack);
+   }
+
+}
