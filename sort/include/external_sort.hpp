@@ -1,10 +1,9 @@
 #pragma once
 
-#include <file.hpp>
 #include <merge_sort.hpp>
+#include <shuffle.hpp>
 #include <quick_sort.hpp>
 
-#define TRACE 0
 
 // ------------------------------------------------------------------
 void print_buf(uint16_t arr[], size_t sz) {
@@ -72,6 +71,7 @@ struct file_proxy_t {
 
 // ------------------------------------------------------------------
 class merge_engine {
+   static constexpr auto tmp_file_name = "tmp.bin";
    std::stack<file_proxy_t> stack_;
    const size_t chunk_;
 
@@ -90,37 +90,80 @@ class merge_engine {
          return file_proxy_t{};
       }
 
-//    const auto o_file_sz = file1_sz + file2_sz;
-      constexpr auto tmp_file_name = "tmp.bin";
       std::ofstream o_file(tmp_file_name, std::ios::binary | std::ios::out);
 
-      std::unique_ptr<char[]> buf1(new char[bytes_sz]);
-      std::unique_ptr<char[]> buf2(new char[bytes_sz]);
-      std::unique_ptr<char[]> result_buf(new char[bytes_sz*2]);
+      std::unique_ptr<char[]> b1(new char[bytes_sz]);
+      std::unique_ptr<char[]> b2(new char[bytes_sz]);
+      std::unique_ptr<char[]> rb(new char [bytes_sz]);
 
-      while (!i_file1.read(buf1.get(), bytes_sz).eof() &&
-             !i_file2.read(buf2.get(), bytes_sz).eof()) {
+      uint16_t* buf1 = reinterpret_cast<uint16_t*>(b1.get());
+      uint16_t* buf2 = reinterpret_cast<uint16_t*>(b2.get());
+      uint16_t* result_buf = reinterpret_cast<uint16_t*>(rb.get());
 
-         ::merge(reinterpret_cast<uint16_t*>(buf1.get()), chunk_,
-                 reinterpret_cast<uint16_t*>(buf2.get()), chunk_, reinterpret_cast<uint16_t*>(result_buf.get()));
+      size_t r1{0};
+      size_t r2{0};
+      size_t  w{0};
 
-         o_file.write(result_buf.get(), bytes_sz*2);
+      i_file1.read(reinterpret_cast<char*>(buf1), bytes_sz);
+      i_file2.read(reinterpret_cast<char*>(buf2), bytes_sz);
+
+      while (true) {
+         while(r1 < chunk_ && r2 < chunk_ && w < chunk_) {
+            if (buf1[r1] < buf2[r2]) {
+               result_buf[w] = buf1[r1];
+               ++r1;
+            } else {
+               result_buf[w] = buf2[r2];
+               ++r2;
+            }
+            ++w;
+         }
+
+         if (w == chunk_) {
+            o_file.write(rb.get(), bytes_sz);
+            w = 0;
+         }
+
+         if (r1 == chunk_) {
+            if (i_file1.read(b1.get(), bytes_sz).eof())
+               break; // while
+            r1 = 0;
+         }
+
+         if (r2 == chunk_) {
+            if (i_file2.read(b2.get(), bytes_sz).eof())
+               break; // while
+            r2 = 0;
+         }
       }
 
-      while (!i_file1.read(buf1.get(), bytes_sz).eof()) {
-         i_file1.read(buf1.get(), bytes_sz);
-         o_file.write(buf1.get(), bytes_sz);
+      if (r1 < chunk_) {
+         while (r1 < chunk_ && w < chunk_) {
+            result_buf[w] = buf1[r1];
+            ++r1;
+            ++w;
+         }
+         o_file.write(rb.get(), bytes_sz);
       }
 
-      while (!i_file2.read(buf1.get(), bytes_sz).eof()) {
-         i_file2.read(buf2.get(), bytes_sz);
-         o_file.write(buf2.get(), bytes_sz);
+      if (r2 < chunk_) {
+         while (r2 < chunk_ && w < chunk_) {
+            result_buf[w] = buf2[r2];
+            ++r2;
+            ++w;
+         }
+         o_file.write(rb.get(), bytes_sz);
+      }
+
+      while (!i_file1.read(b1.get(), bytes_sz).eof()) {
+         o_file.write(b1.get(), bytes_sz);
+      }
+
+      while (!i_file2.read(b2.get(), bytes_sz).eof()) {
+         o_file.write(b2.get(), bytes_sz);
       }
       o_file.close();
 
-      print_file_stuff(file1.name, chunk_);
-      print_file_stuff(file2.name, chunk_);
-      print_file_stuff(tmp_file_name, chunk_);
 
       std::remove(file1.name.c_str());
       std::remove(file2.name.c_str());
@@ -171,10 +214,6 @@ std::string sort_file(const char* file_name, size_t chunk) {
    std::unique_ptr<char[]> buf(new char[bytes_sz]);
 
    while (!i_file.read(buf.get(), bytes_sz).eof()) {
-#if TRACE
-      print(buf.get(), chunk);
-#endif // TRACE
-
       quick_sort::sort(reinterpret_cast<uint16_t*>(buf.get()), chunk);
 
       const auto o_file_name = generate_file_name(file_num++);
@@ -183,9 +222,6 @@ std::string sort_file(const char* file_name, size_t chunk) {
       o_file.close();
 
       me.add_file_proxy(file_proxy_t{o_file_name.c_str()});
-#if TRACE
-      print(buf.get(), chunk);
-#endif // TRACE
    }
    i_file.close();
    return me.merge().name;

@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <external_sort.hpp>
-#include <file.hpp>
 #include <heap_sort.hpp>
 #include <insertion_sort.hpp>
 #include <merge_sort.hpp>
@@ -147,32 +146,18 @@ TEMPLATE_TEST_CASE("large int array sort", "[sort][template]", heap_sort, merge_
 
 // ------------------------------------------------------------------
 TEST_CASE("test file creation", "[file_test]") {
-   SECTION("file creation") {
-      constexpr auto shuffled_file_name = "shuffled.bin";
-      constexpr auto digits_count = 32;
-      constexpr auto chunk = 8;
-
-      create_shuffled_binary_file(shuffled_file_name, digits_count, digits_count);
-      print_file_stuff(shuffled_file_name, chunk);
-
-//    CHECK_FALSE(file::is_file_sorted(shuffled_file_name, chunk_sz));
-      const auto sorted_file_name = sort_file(shuffled_file_name, chunk);
-      print_file_stuff(sorted_file_name, chunk);
-//    CHECK(file::is_file_sorted(res.c_str(), chunk_sz));
-
-   }
-
    SECTION("file name generation") {
       CHECK(generate_file_name(  1) == std::string(  "1.bin"));
       CHECK(generate_file_name(128) == std::string("128.bin"));
    }
 
-   SECTION("merge algorithm") {
-      std::vector<file::chunk_t> chunks(1'000);
-      for (const auto& chunk: chunks) {
-         file::apply_chunk(chunk);
-      }
-      file::print(file::stack);
-   }
+   SECTION("file sorting") {
+      constexpr auto shuffled_file_name = "shuffled.bin";
+      constexpr auto digits_count = 100'000;
+      constexpr auto chunk = 100;
 
+      create_shuffled_binary_file(shuffled_file_name, digits_count, 65'535);
+      const auto sorted_file_name = sort_file(shuffled_file_name, chunk);
+      print_file_stuff(sorted_file_name, chunk);
+   }
 }
