@@ -182,7 +182,7 @@ public:
          stack_.push(file);
          return;
       }
-      auto& top = stack_.top();
+      auto top = std::move(stack_.top());
       stack_.pop();
       const auto merged = merge_files(top, file);
       add_file_proxy(merged);
@@ -216,7 +216,7 @@ std::string sort_file(const char* file_name, size_t chunk) {
    std::unique_ptr<char[]> buf(new char[bytes_sz]);
 
    while (!i_file.read(buf.get(), bytes_sz).eof()) {
-      quick_sort::sort(reinterpret_cast<uint16_t*>(buf.get()), chunk);
+      quick_sort::sort(reinterpret_cast<uint16_t*>(buf.get()), static_cast<int>(chunk));
 
       const auto o_file_name = generate_file_name(file_num++);
       std::ofstream o_file(o_file_name, std::ios::binary | std::ios::out);

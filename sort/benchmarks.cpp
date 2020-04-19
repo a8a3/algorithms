@@ -68,13 +68,17 @@ BENCHMARK_TEMPLATE(BM_near_sorted_array_sort, heap_sort_call)->Unit(benchmark::k
 
 #else // 0
 
+#include <algorithm>
+#include <numeric>
+
 #include <external_sort.hpp>
 
 static void BM_external_sort(benchmark::State& state) {
    for (auto _ : state) {
       state.PauseTiming();
       constexpr auto shuffled_file_name = "shuffled.bin";
-      create_shuffled_binary_file(shuffled_file_name, state.range(0), std::min(state.range(0), 65'535L));
+      const int64_t default_random_range = 65'535;
+      create_shuffled_binary_file(shuffled_file_name, state.range(0), std::min(state.range(0), default_random_range));
       state.ResumeTiming();
 
       sort_file(shuffled_file_name, state.range(1));

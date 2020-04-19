@@ -14,5 +14,5 @@ void make_shuffle(T* what, size_t sz) {
 
 // ------------------------------------------------------------------
 constexpr size_t get_percent(size_t total, size_t percent) {
-   return total * (percent/100.);
+   return static_cast<size_t>(total * (percent/100.));
 }
