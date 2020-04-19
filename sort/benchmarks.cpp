@@ -1,11 +1,10 @@
 #include <benchmark/benchmark.h>
 
+#if 0
 #include <memory>
 #include <numeric>
 #include <vector>
-
 #include <shuffle.hpp>
-
 #include "include/shell_sort.hpp"
 #include "include/heap_sort.hpp"
 
@@ -14,15 +13,6 @@ constexpr auto SIZE = 100'000;
 constexpr auto UNSORTED = get_percent(SIZE, 5);
 } // namespace settings
 
-
-//Как сравнивать скорость.
-//1. Выбрать подходящий размер массива, чтобы алгоритм работал 5-20 секунд.
-//2. Создать два массива выбранного размера:
-//а. случайный;
-//б. отсортированный, в котором перемешано 5% элементов.
-//3. Замерять время работы алгоритмов HeapSort и ShellSort (с тремя разными вариантами шагов)
-//для каждого массива, заполняя табличку. Таблицу приложить к коду.
-//4. Сделать вывод, какой алгоритм соритровки лучше.
 
 // ------------------------------------------------------------------
 template<typename G>
@@ -76,5 +66,26 @@ BENCHMARK_TEMPLATE(BM_near_sorted_array_sort, shell_sort_call<gap::hibbard>)->Un
 BENCHMARK_TEMPLATE(BM_near_sorted_array_sort, shell_sort_call<gap::sedgewick>)->Unit(benchmark::kMillisecond);
 BENCHMARK_TEMPLATE(BM_near_sorted_array_sort, heap_sort_call)->Unit(benchmark::kMillisecond);
 
+#else // 0
+
+#include <external_sort.hpp>
+
+static void BM_external_sort(benchmark::State& state) {
+   for (auto _ : state) {
+      state.PauseTiming();
+      constexpr auto shuffled_file_name = "shuffled.bin";
+      create_shuffled_binary_file(shuffled_file_name, state.range(0), std::min(state.range(0), 65'535L));
+      state.ResumeTiming();
+
+      sort_file(shuffled_file_name, state.range(1));
+   }
+}
+BENCHMARK(BM_external_sort)->Unit(benchmark::kMillisecond)->Args({1'048'576,  8})
+                                                          ->Args({1'048'576, 16})
+                                                          ->Args({1'048'576, 32})
+                                                          ->Args({1'048'576, 64});
+// 1'073'741'824
+
+#endif // 0
 
 BENCHMARK_MAIN();

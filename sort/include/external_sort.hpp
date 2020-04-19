@@ -1,9 +1,11 @@
 #pragma once
 
+#include <fstream>
+#include <stack>
+
 #include <merge_sort.hpp>
 #include <shuffle.hpp>
 #include <quick_sort.hpp>
-
 
 // ------------------------------------------------------------------
 void print_buf(uint16_t arr[], size_t sz) {
