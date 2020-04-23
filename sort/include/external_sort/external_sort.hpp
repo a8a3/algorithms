@@ -1,11 +1,14 @@
 #pragma once
 
 #include <fstream>
+#include <list>
 #include <stack>
 
 #include <merge_sort.hpp>
 #include <shuffle.hpp>
 #include <quick_sort.hpp>
+
+namespace external_sort {
 
 // ------------------------------------------------------------------
 void print_buf(uint16_t arr[], size_t sz) {
@@ -36,6 +39,73 @@ void print_file_stuff(const std::string& name, size_t chunk) {
 }
 
 // ------------------------------------------------------------------
+bool is_file_sorted(const std::string& name, size_t chunk) {
+   bool res = true;
+   const size_t bytes_sz = chunk * sizeof(uint16_t);
+
+   std::ifstream file(name, std::ios::binary | std::ios::in);
+
+   if (!file.is_open()) {
+      std::cerr << "unable to open file: " << name << '\n';
+      return false;
+   }
+   std::unique_ptr<uint16_t []> buf(new uint16_t[chunk]);
+   uint16_t last_chunk_max_val = 0;
+
+   while(!file.read(reinterpret_cast<char*>(buf.get()), bytes_sz).eof()) {
+      if (buf.get()[0] < last_chunk_max_val || !std::is_sorted(buf.get(), buf.get() + chunk)) {
+         res = false;
+         break; // while
+      }
+      last_chunk_max_val = buf.get()[chunk-1];
+   }
+   file.close();
+   return res;
+}
+
+// ------------------------------------------------------------------
+std::string split_files(const std::string& file1, const std::string& file2, size_t chunk) {
+   const size_t bytes_sz = chunk*sizeof(uint16_t);
+
+   std::ifstream i_file1(file1, std::ios::binary | std::ios::in);
+   if (!i_file1.is_open()) {
+      std::cerr << "unable to open file: " << file1 << '\n';
+      return std::string{};
+   }
+
+   std::ifstream i_file2(file2, std::ios::binary | std::ios::in);
+   if (!i_file2.is_open()) {
+      std::cerr << "unable to open file: " << file2 << '\n';
+      return std::string{};
+   }
+
+   constexpr auto tmp_file_name = "tmp.bin";
+   std::ofstream o_file(tmp_file_name, std::ios::binary | std::ios::out);
+
+   if (!o_file.is_open()) {
+      std::cerr << "unable to open file: " << file2 << '\n';
+      return std::string{};
+   }
+
+   std::unique_ptr<char[]> buf(new char[bytes_sz]);
+
+   while (!i_file1.read(buf.get(), bytes_sz).eof()) {
+      o_file.write(buf.get(), bytes_sz);
+   }
+
+   while (!i_file2.read(buf.get(), bytes_sz).eof()) {
+      o_file.write(buf.get(), bytes_sz);
+   }
+   o_file.close();
+
+   std::remove(file1.c_str());
+   std::remove(file2.c_str());
+
+   std::rename(tmp_file_name, file1.c_str());
+   return file1;
+}
+
+// ------------------------------------------------------------------
 void create_shuffled_binary_file(const char* name, size_t count, size_t write_by) {
    std::ofstream file(name, std::ios::binary | std::ios::out);
 
@@ -44,16 +114,16 @@ void create_shuffled_binary_file(const char* name, size_t count, size_t write_by
       return;
    }
    size_t writed = 0;
+   std::unique_ptr<uint16_t[]> buf(new uint16_t[write_by]);
 
    while (writed < count) {
-
       if (writed + write_by > count) {
          write_by = count - writed;
       }
+      std::iota(buf.get(), buf.get() + write_by, 0);
 
-      std::unique_ptr<uint16_t []> buf(new uint16_t[write_by]);
-      std::iota(buf.get(), buf.get() + write_by, writed);
       make_shuffle(buf.get(), write_by);
+
       file.write(reinterpret_cast<const char*>(buf.get()), write_by * sizeof(uint16_t));
       writed += write_by;
    }
@@ -200,31 +270,4 @@ public:
    }
 };
 
-// ------------------------------------------------------------------
-std::string sort_file(const char* file_name, size_t chunk) {
-   const size_t bytes_sz = chunk * sizeof(uint16_t);
-   std::ifstream i_file(file_name, std::ios::binary | std::ios::in);
-
-   if (!i_file.is_open()) {
-      std::cerr << "unable to open file: " << file_name << '\n';
-      return std::string{};
-   }
-
-   merge_engine me(chunk);
-
-   size_t file_num = 0;
-   std::unique_ptr<char[]> buf(new char[bytes_sz]);
-
-   while (!i_file.read(buf.get(), bytes_sz).eof()) {
-      quick_sort::sort(reinterpret_cast<uint16_t*>(buf.get()), static_cast<int>(chunk));
-
-      const auto o_file_name = generate_file_name(file_num++);
-      std::ofstream o_file(o_file_name, std::ios::binary | std::ios::out);
-      o_file.write(buf.get(), bytes_sz);
-      o_file.close();
-
-      me.add_file_proxy(file_proxy_t{o_file_name.c_str()});
-   }
-   i_file.close();
-   return me.merge().name;
-}
+} // namespace external_sort

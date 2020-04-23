@@ -4,7 +4,9 @@
 
 #include <vector>
 
-#include <external_sort.hpp>
+#include <external_sort/bucket_sort.hpp>
+#include <external_sort/quick_sort.hpp>
+
 #include <heap_sort.hpp>
 #include <insertion_sort.hpp>
 #include <merge_sort.hpp>
@@ -145,10 +147,10 @@ TEMPLATE_TEST_CASE("large int array sort", "[sort][template]", heap_sort, merge_
 }
 
 // ------------------------------------------------------------------
-TEST_CASE("test file creation", "[file_test]") {
+TEST_CASE("external_sort_with_quick_sort", "[file_sort]") {
    SECTION("file name generation") {
-      CHECK(generate_file_name(  1) == std::string(  "1.bin"));
-      CHECK(generate_file_name(128) == std::string("128.bin"));
+      CHECK(external_sort::generate_file_name(  1) == std::string(  "1.bin"));
+      CHECK(external_sort::generate_file_name(128) == std::string("128.bin"));
    }
 
    SECTION("file sorting") {
@@ -156,8 +158,36 @@ TEST_CASE("test file creation", "[file_test]") {
       constexpr auto digits_count = 100'000;
       constexpr auto chunk = 100;
 
-      create_shuffled_binary_file(shuffled_file_name, digits_count, 65'535);
-      const auto sorted_file_name = sort_file(shuffled_file_name, chunk);
-      print_file_stuff(sorted_file_name, chunk);
+      external_sort::create_shuffled_binary_file(shuffled_file_name, digits_count, 65'535);
+      CHECK_FALSE(external_sort::is_file_sorted(shuffled_file_name, chunk));
+      const auto sorted_file_name = external_sort::quick::sort_file(shuffled_file_name, chunk);
+      CHECK(external_sort::is_file_sorted(sorted_file_name, chunk));
+   }
+}
+
+// ------------------------------------------------------------------
+TEST_CASE("external_sort_with_bucket_sort", "[file_sort]") {
+
+   SECTION("get bucket idx") {
+      constexpr auto bucket_sz = 10;
+
+      CHECK(external_sort::bucket::get_bucket_idx(  0, bucket_sz) ==  0);
+      CHECK(external_sort::bucket::get_bucket_idx(  9, bucket_sz) ==  0);
+      CHECK(external_sort::bucket::get_bucket_idx( 21, bucket_sz) ==  2);
+      CHECK(external_sort::bucket::get_bucket_idx( 29, bucket_sz) ==  2);
+      CHECK(external_sort::bucket::get_bucket_idx(100, bucket_sz) == 10);
+   }
+
+   SECTION("file sorting") {
+      constexpr auto shuffled_file_name = "shuffled.bin";
+      constexpr auto digits_count = 100'000;
+      constexpr auto max_digit_val = std::min(digits_count, 65'000);
+      constexpr auto buckets_count = 650;
+      constexpr auto chunk = 100;
+
+      external_sort::create_shuffled_binary_file(shuffled_file_name, digits_count, 65'000);
+      CHECK_FALSE(external_sort::is_file_sorted(shuffled_file_name, chunk));
+      const auto sorted_file_name = external_sort::bucket::sort_file(shuffled_file_name, chunk, buckets_count, max_digit_val);
+      CHECK(external_sort::is_file_sorted(sorted_file_name, chunk));
    }
 }
