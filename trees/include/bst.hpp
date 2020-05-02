@@ -1,6 +1,8 @@
 #pragma once
 
+#include <iostream>
 #include <istream>
+#include <queue>
 
 namespace bst {
 
@@ -8,14 +10,18 @@ namespace bst {
 class node {
 public:
    explicit node(int val) : value_(val) {}
-   ~node() {
+
+   node(const node&) = delete;
+   node&operator =(const node&) = delete;
+
+   virtual ~node() {
       delete left_;
       left_ = nullptr;
       delete right_;
       right_ = nullptr;
    }
 
-   node& insert(int val) {
+   virtual node& insert(int val) {
       node* current = this;
 
       while (true) {
@@ -23,14 +29,14 @@ public:
             if (current->left_) {
                current = current->left_;
             } else {
-               current->left_ = new node(val);
+               current->left_ = create_node(val);
                break; // while
             }
          } else {
             if (current->right_) {
                current = current->right_;
             } else {
-               current->right_ = new node(val);
+               current->right_ = create_node(val);
                break; // while
             }
          }
@@ -38,18 +44,7 @@ public:
       return *this;
    }
 
-   int get_min_value() const {
-      const node* current = this;
-
-      while(current->left_) {
-         current = current->left_;
-      }
-      return current->value_;
-   }
-
-
-// TODO
-   node& remove(int val, node* parent = nullptr) {
+   virtual node& remove(int val, node* parent = nullptr) {
       node* current = this;
 
       while(current) {
@@ -137,10 +132,9 @@ public:
       return false;
    }
 
-   int   get_value() const {return value_;}
-
-   node* get_left () const {return left_;}
-   node* get_right() const {return right_;}
+   int   get_value () const {return value_;}
+   node* get_left  () const {return left_;}
+   node* get_right () const {return right_;}
 
    size_t size() const {
       size_t res = 1;
@@ -152,14 +146,24 @@ public:
       return res;
    }
 
-private:
-   void set_left (node* n) {left_  = n;}
-   void set_right(node* n) {right_ = n;}
-
-   int value_;
-
-   node* left_{nullptr};
+protected:
+   int   value_;
+   node* left_ {nullptr};
    node* right_{nullptr};
+
+private:
+   int get_min_value() const {
+      const node* current = this;
+
+      while(current->left_) {
+         current = current->left_;
+      }
+      return current->value_;
+   }
+
+   virtual node* create_node(int val) const {
+      return new node(val);
+   }
 };
 
 // ------------------------------------------------------------------
@@ -202,6 +206,40 @@ void print(node* n) {
    std::clog << "bst: ";
    print_helper(n);
    std::clog << '\n';
+}
+
+// ------------------------------------------------------------------
+struct storage {
+   node* n{nullptr};
+   node* p{nullptr};
+   int level{0};
+};
+
+// ------------------------------------------------------------------
+void print_by_level(node* n) {
+   std::queue<storage> q;
+   int level{0};
+   q.push({n, nullptr, level});
+
+   while(!q.empty()) {
+      while (!q.empty() && q.front().level == level) {
+         const storage& s = q.front();
+         const std::string parent_val(s.p ? std::to_string(s.p->get_value()) : "r");
+         std::clog << s.n->get_value() << '(' << parent_val << ')' << ' ';
+
+         node* l = s.n->get_left();
+         node* r = s.n->get_right();
+
+         if (l)
+            q.push({l, s.n, level+1});
+         if (r)
+            q.push({r, s.n, level+1});
+
+         q.pop();
+      }
+      std::clog << '\n';
+      ++level;
+   }
 }
 
 } // namespace bst

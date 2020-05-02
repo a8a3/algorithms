@@ -16,7 +16,7 @@ namespace settings {
 constexpr auto SIZE = 100'000;
 constexpr auto UNSORTED = get_percent(SIZE, 5);
 } // namespace settings
------------------------------------------------------------------
+// ------------------------------------------------------------------
 template<typename G>
 struct shell_sort_call {
    void operator () (int* arr, size_t sz) {
