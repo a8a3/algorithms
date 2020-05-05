@@ -2,8 +2,9 @@
 
 #include <catch.hpp>
 
-#include <bst.hpp>
 #include <avl.hpp>
+#include <bst.hpp>
+#include <rb.hpp>
 
 // ------------------------------------------------------------------
 TEMPLATE_TEST_CASE("base operations", "[binary search tree][template]", bst::node, avl::node) {
@@ -70,7 +71,7 @@ TEMPLATE_TEST_CASE("base operations", "[binary search tree][template]", bst::nod
    }
 
    SECTION("degenerate to list") {
-      auto degenerated = bst::node(0);
+      bst::node degenerated(0);
       for (int i = 1; i < 10; ++i) {
          degenerated.insert(i);
       }
@@ -102,7 +103,7 @@ TEMPLATE_TEST_CASE("base operations", "[binary search tree][template]", bst::nod
 }
 
 // ------------------------------------------------------------------
-TEST_CASE("height detection test", "[avl tree]") {
+TEST_CASE("avl rebalancing", "[avl tree]") {
    avl::node tree(42);
 
    SECTION("rebalancing, small left rotation") {
@@ -153,11 +154,45 @@ TEST_CASE("height detection test", "[avl tree]") {
       CHECK(tree.get_height() == 2);
       CHECK(bst::is_search_tree(&tree));
    }
+}
 
-   SECTION("rebalancing, add a lot of nodes") {
-      for (int i = 0; i < 10'000; ++i) {
-         tree.insert(i);
-      }
-//    bst::print_by_level(&tree);
+
+// ------------------------------------------------------------------
+TEST_CASE("rb rebalancing", "[rb tree]") {
+
+   SECTION("recolor root") {
+      rb::node* root = rb::insert(42);
+      CHECK(root->clr == rb::color::black);
+      rb::node* inserted = rb::insert(100, root);
+      CHECK(inserted->clr == rb::color::red);
+      rb::remove(root);
+   }
+
+   SECTION("ascending insertion") {
+      rb::node* root = rb::insert(0);
+      rb::insert(1, root);
+      rb::insert(2, root);
+      rb::insert(3, root);
+      rb::insert(4, root);
+      rb::insert(5, root);
+      rb::insert(6, root);
+      rb::insert(7, root);
+      rb::insert(8, root);
+      rb::insert(9, root);
+      rb::remove(root);
+   }
+
+   SECTION("descending insertion") {
+      rb::node* root = rb::insert(9);
+      rb::insert(8, root);
+      rb::insert(7, root);
+      rb::insert(6, root);
+      rb::insert(5, root);
+      rb::insert(4, root);
+      rb::insert(3, root);
+      rb::insert(2, root);
+      rb::insert(1, root);
+      rb::insert(0, root);
+      rb::remove(root);
    }
 }
