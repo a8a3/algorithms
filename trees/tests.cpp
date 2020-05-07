@@ -6,6 +6,8 @@
 #include <bst.hpp>
 #include <rb.hpp>
 
+#include <shuffle.hpp>
+
 // ------------------------------------------------------------------
 TEMPLATE_TEST_CASE("base operations", "[binary search tree][template]", bst::node, avl::node) {
    TestType tree(5);
@@ -158,41 +160,77 @@ TEST_CASE("avl rebalancing", "[avl tree]") {
 
 
 // ------------------------------------------------------------------
-TEST_CASE("rb rebalancing", "[rb tree]") {
-
-   SECTION("recolor root") {
-      rb::node* root = rb::insert(42);
-      CHECK(root->clr == rb::color::black);
-      rb::node* inserted = rb::insert(100, root);
-      CHECK(inserted->clr == rb::color::red);
-      rb::remove(root);
-   }
+TEST_CASE("rb rebalancing", "[red-black tree]") {
 
    SECTION("ascending insertion") {
-      rb::node* root = rb::insert(0);
-      rb::insert(1, root);
-      rb::insert(2, root);
-      rb::insert(3, root);
-      rb::insert(4, root);
-      rb::insert(5, root);
-      rb::insert(6, root);
-      rb::insert(7, root);
-      rb::insert(8, root);
-      rb::insert(9, root);
-      rb::remove(root);
+      constexpr auto sz = 10;
+      rb::tree t;
+      for (size_t i = 0; i < sz; ++i) {
+         t.insert(i);
+      }
+
+      for(size_t i = 0; i < sz; ++i) {
+         CHECK(t.search(i));
+      }
+   }
+
+   SECTION("zig zag insertion") {
+      rb::tree t;
+      const int arr[] = {100, 80, 90, 85, 87, 86};
+
+      for (int i: arr) {
+         t.insert(i);
+      }
    }
 
    SECTION("descending insertion") {
-      rb::node* root = rb::insert(9);
-      rb::insert(8, root);
-      rb::insert(7, root);
-      rb::insert(6, root);
-      rb::insert(5, root);
-      rb::insert(4, root);
-      rb::insert(3, root);
-      rb::insert(2, root);
-      rb::insert(1, root);
-      rb::insert(0, root);
-      rb::remove(root);
+      constexpr auto sz = 10;
+      rb::tree t;
+      for (int i = sz-1; i >= 0; --i) {
+         t.insert(i);
+      }
+
+      for(int i = sz-1; i >= 0; --i) {
+         CHECK(t.search(i));
+      }
+   }
+
+   SECTION("left parent, right child") {
+      rb::tree t;
+      const int values[] = {8, 6, 4, 2, 3};
+
+      for (int i: values) {
+         t.insert(i);
+      }
+
+      for (int i: values) {
+         CHECK(t.search(i));
+      }
+   }
+
+   SECTION("right parent, left child") {
+      rb::tree t;
+      const int values[] = {2, 4, 6, 8, 7};
+
+      for (int i: values) {
+         t.insert(i);
+      }
+
+      for (int i: values) {
+         CHECK(t.search(i));
+      }
+   }
+
+   SECTION("random values insertion") {
+      constexpr auto tree_sz = 1000;
+      rb::tree t;
+
+      std::unique_ptr<int[]> arr(new int[tree_sz]);
+      std::iota(arr.get(), arr.get() + tree_sz, 0);
+      make_shuffle(arr.get(), tree_sz);
+
+      for(int i = tree_sz-1; i >= 0; --i) {
+         t.insert(arr.get()[i]);
+      }
    }
 }

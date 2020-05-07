@@ -5,10 +5,11 @@
 
 #include <avl.hpp>
 #include <bst.hpp>
+#include <rb.hpp>
 #include <shuffle.hpp>
 
 namespace settings {
-int iterations = 10;
+int iterations = 32;
 } // namespace settings
 
 // ------------------------------------------------------------------
@@ -222,6 +223,112 @@ BENCHMARK_TEMPLATE(BM_tree_operations, avl::node, increased_tree_creator<avl::no
       ->Arg(40'000);
 
 BENCHMARK_TEMPLATE(BM_tree_operations, avl::node, shuffled_tree_creator<avl::node>, search_call<avl::node>)->Unit(benchmark::kMillisecond)->Iterations(settings::iterations)
+      ->Arg(1'000)
+      ->Arg(5'000)
+      ->Arg(10'000)
+      ->Arg(20'000)
+      ->Arg(40'000);
+
+
+// ------------------------------------------------------------------
+static void BM_rb_tree_increased_sequence_insertion(benchmark::State& state) {
+   const auto arr_sz = state.range(0);
+
+   for (auto _ : state) {
+      rb::tree t;
+      for(int i = 0; i < arr_sz; ++i) {
+         t.insert(i);
+      }
+   }
+}
+BENCHMARK(BM_rb_tree_increased_sequence_insertion)->Unit(benchmark::kMillisecond)->Iterations(settings::iterations)
+      ->Arg(1'000)
+      ->Arg(5'000)
+      ->Arg(10'000)
+      ->Arg(20'000)
+      ->Arg(40'000);
+
+// ------------------------------------------------------------------
+static void BM_rb_tree_shuffled_sequence_insertion(benchmark::State& state) {
+   const auto tree_sz = state.range(0);
+   std::unique_ptr<int[]> arr(new int[tree_sz]);
+   std::iota(arr.get(), arr.get() + tree_sz, 0);
+   make_shuffle(arr.get(), tree_sz);
+
+   for (auto _ : state) {
+      rb::tree t;
+      for(int i = 0; i < tree_sz; ++i) {
+         t.insert(arr.get()[i]);
+      }
+   }
+}
+BENCHMARK(BM_rb_tree_shuffled_sequence_insertion)->Unit(benchmark::kMillisecond)->Iterations(settings::iterations)
+      ->Arg(1'000)
+      ->Arg(5'000)
+      ->Arg(10'000)
+      ->Arg(20'000)
+      ->Arg(40'000);
+
+
+// ------------------------------------------------------------------
+std::vector<int> get_random_digits(size_t distribution_sz, size_t out_sz) {
+   std::vector<int> result(out_sz);
+
+   std::mt19937 random_engine;
+   std::uniform_int_distribution<int> distribution{0, static_cast<int>(distribution_sz)};
+
+   std::generate(result.begin(), result.end(),
+                 [&distribution, &random_engine](){return distribution(random_engine);});
+
+   return result;
+}
+
+// ------------------------------------------------------------------
+static void BM_rb_tree_increased_sequence_search(benchmark::State& state) {
+   const auto tree_sz = state.range(0);
+
+   rb::tree t;
+   for(int i = 0; i < tree_sz; ++i) {
+      t.insert(i);
+   }
+
+   const auto search_sz = tree_sz / 10;
+   const auto for_search = get_random_digits(tree_sz, search_sz);
+
+   for (auto _ : state) {
+      for(int i = 0; i < search_sz; ++i) {
+          t.search(for_search[i]);
+      }
+   }
+}
+BENCHMARK(BM_rb_tree_increased_sequence_search)->Unit(benchmark::kMillisecond)->Iterations(settings::iterations)
+      ->Arg(1'000)
+      ->Arg(5'000)
+      ->Arg(10'000)
+      ->Arg(20'000)
+      ->Arg(40'000);
+
+// ------------------------------------------------------------------
+static void BM_rb_tree_shuffled_sequence_search(benchmark::State& state) {
+   const auto tree_sz = state.range(0);
+   std::unique_ptr<int[]> arr(new int[tree_sz]);
+   std::iota(arr.get(), arr.get() + tree_sz, 0);
+   make_shuffle(arr.get(), tree_sz);
+
+   rb::tree t;
+   for(int i = 0; i < tree_sz; ++i) {
+      t.insert(arr.get()[i]);
+   }
+   const auto search_sz = tree_sz / 10;
+   const auto for_search = get_random_digits(tree_sz, search_sz);
+
+   for (auto _ : state) {
+      for(int i = 0; i < search_sz; ++i) {
+         t.search(for_search[i]);
+      }
+   }
+}
+BENCHMARK(BM_rb_tree_shuffled_sequence_search)->Unit(benchmark::kMillisecond)->Iterations(settings::iterations)
       ->Arg(1'000)
       ->Arg(5'000)
       ->Arg(10'000)

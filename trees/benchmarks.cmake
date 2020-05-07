@@ -2,7 +2,10 @@
 set(TARGET_NAME trees_benchmarks)
 find_package(benchmark REQUIRED)
 
-add_executable(${TARGET_NAME} benchmarks.cpp)
+add_executable(${TARGET_NAME}
+        benchmarks.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/impl/rb_impl.cpp
+        )
 
 target_include_directories(${TARGET_NAME}
      PRIVATE

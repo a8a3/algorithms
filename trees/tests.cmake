@@ -1,6 +1,9 @@
 
 set(TARGET_NAME trees_tests)
-add_executable(${TARGET_NAME} tests.cpp)
+add_executable(${TARGET_NAME}
+        ${CMAKE_CURRENT_SOURCE_DIR}/impl/rb_impl.cpp
+        tests.cpp
+)
 
 target_include_directories(${TARGET_NAME}
         PRIVATE
