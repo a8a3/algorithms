@@ -5,6 +5,7 @@
 #include <avl.hpp>
 #include <bst.hpp>
 #include <rb.hpp>
+#include <segment.hpp>
 
 #include <shuffle.hpp>
 
@@ -232,5 +233,16 @@ TEST_CASE("rb rebalancing", "[red-black tree]") {
       for(int i = tree_sz-1; i >= 0; --i) {
          t.insert(arr.get()[i]);
       }
+   }
+}
+
+// ------------------------------------------------------------------
+TEST_CASE("sum calc", "[segments tree]") {
+   SECTION("get parent") {
+
+   }
+
+   SECTION("get children") {
+
    }
 }
