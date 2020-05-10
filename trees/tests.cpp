@@ -238,11 +238,39 @@ TEST_CASE("rb rebalancing", "[red-black tree]") {
 
 // ------------------------------------------------------------------
 TEST_CASE("sum calc", "[segments tree]") {
-   SECTION("get parent") {
-
+   SECTION("auxiliary") {
+      CHECK(segment::next_pow_of2(1) == 1);
+      CHECK(segment::next_pow_of2(3) == 4);
+      CHECK(segment::next_pow_of2(4) == 4);
+      CHECK(segment::next_pow_of2(5) == 8);
+      CHECK(segment::next_pow_of2(6) == 8);
+      CHECK(segment::next_pow_of2(7) == 8);
+      CHECK(segment::next_pow_of2(8) == 8);
    }
 
-   SECTION("get children") {
+   SECTION("calc") {
+      constexpr int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+      segment::tree t(arr, sizeof(arr) / sizeof(arr[0]));
+      CHECK(t.calc(0, 0) ==  1);
+      CHECK(t.calc(0, 7) == 36);
+      CHECK(t.calc(0, 1) ==  3);
+      CHECK(t.calc(0, 2) ==  6);
+      CHECK(t.calc(7, 7) ==  8);
+      CHECK(t.calc(6, 7) == 15);
+      CHECK(t.calc(5, 7) == 21);
+      CHECK(t.calc(7, 8) == 17);
+   }
 
+   SECTION("set + calc") {
+      segment::tree t(10);
+      CHECK(t.calc(0, 9) == 0);
+      t.set(0, 10);
+      t.set(1, 20);
+      CHECK(t.calc(0, 1) == 30);
+      t.set(2, 30);
+      t.set(3, 40);
+      CHECK(t.calc(0, 3) == 100);
+      t.set(3, 50);
+      CHECK(t.calc(0, 3) == 110);
    }
 }
