@@ -6,11 +6,10 @@
 namespace graph {
 
 using vertexes = std::vector<int>;
-
 using strong_connected_component = std::vector<vertexes>;
 
 template<size_t N>
-using adjacency_vectors = std::array<std::vector<int>, N>;
+using adjacency_vectors = std::array<vertexes, N>;
 
 // ------------------------------------------------------------------
 template<size_t N> adjacency_vectors<N> revert(const adjacency_vectors<N>& m) {
