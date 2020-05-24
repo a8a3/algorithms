@@ -1,34 +1,43 @@
+#include <cassert>
 #include <iostream>
+#include <vector>
 
-// ----------------------------------------------
+// wr
+// abcbcc
+
+// ------------------------------------------------------------------
+size_t remove_duplicates(char* s, size_t sz) {
+   if (sz < 2) {
+      return sz;
+   }
+   size_t r = 1;
+   size_t w = 0;
+
+   while (r < sz) {
+      if (s[r] != s[w]) {
+         ++w;
+         if (w != r) {
+            s[w] = s[r];
+         }
+      }
+      ++r;
+   }
+   return w;
+}
+
+// ------------------------------------------------------------------
 int main() {
 
-   int t;
-   std::cin >> t;
+   using test = std::pair<std::string, size_t>;
+   std::vector<test> data{
+      {"aaabbb", 1},
+      {"aaaaaa", 0},
+      {"abcdef", 5},
+      {"abbbbb", 1},
+      {"aaaaab", 1}
+   };
 
-   while(t--) {
-      int e;
-      std::cin >> e;
-      int sz = e;
-
-      int* inexp = new int[sz+2];
-      for (int i = 0; i < sz + 2; ++i) {
-         inexp[i] = 0;
-      }
-
-      while(e--) {
-         int ie;
-         std::cin >> ie;
-         ++inexp[ie];
-      }
-
-      int groups = 0;
-      for (int i = 1; i < sz+1; ++i) {
-         int ie = inexp[i];
-         groups += ie / i;
-         inexp[i+1] += ie % i;
-      }
-      std::cout << groups << '\n';
-      delete[] inexp;
+   for (auto& t: data) {
+      assert(remove_duplicates(&t.first.front(), t.first.size()) == t.second);
    }
 }
