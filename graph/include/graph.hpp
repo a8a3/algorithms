@@ -13,7 +13,7 @@ using adjacency_vectors = std::array<vertexes, N>;
 
 // ------------------------------------------------------------------
 template<size_t N> adjacency_vectors<N> revert(const adjacency_vectors<N>& m) {
-      adjacency_vectors<N> res;
+   adjacency_vectors<N> res;
 
    for(size_t r = 0; r < N; ++r) {
       const auto& row = m[r];

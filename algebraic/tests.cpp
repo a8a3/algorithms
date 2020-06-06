@@ -82,42 +82,31 @@ TEST_CASE("matrix_fib", "[fib]") {
    std::cerr << "fib 30: " << fib_matrix::get_value(30) << '\n';
 }
 
+struct gcd_euclideus_t {
+   uint32_t operator() (uint32_t a, uint32_t b) {return gcd_euclideus(a, b);}
+};
+struct gcd_use_mod_t {
+   uint32_t operator() (uint32_t a, uint32_t b) {return gcd_use_mod(a, b);}
+};
+struct gcd_use_recursive_mod_t {
+   uint32_t operator() (uint32_t a, uint32_t b) {return gcd_use_recursive_mod(a, b);}
+};
+struct gcd_use_steins_algorithm_t {
+   uint32_t operator() (uint32_t a, uint32_t b) {return steins_algorithm(a, b);}
+};
+
 // ------------------------------------------------------------------
-TEST_CASE("gcd_euclideus", "[gcd]") {
-   CHECK(gcd_euclideus( 20, 15) ==  5);
-   CHECK(gcd_euclideus(  4,  2) ==  2);
-   CHECK(gcd_euclideus(  2,  2) ==  2);
-   CHECK(gcd_euclideus( 13, 15) ==  1);
-   CHECK(gcd_euclideus(121, 22) == 11);
-   CHECK(gcd_euclideus(201, 15) ==  3);
-   CHECK(gcd_euclideus( 20,  9) ==  1);
-   CHECK(gcd_euclideus(125, 15) ==  5);
-   CHECK(gcd_euclideus(  2, 1234567890) == 2);
-   CHECK(gcd_euclideus(  1, 1234567890) == 1);
-}
-TEST_CASE("gcd_use_mod", "[gcd]") {
-   CHECK(gcd_use_mod(20, 15)  == 5);
-   CHECK(gcd_use_mod(4, 2)    == 2);
-   CHECK(gcd_use_mod(2, 2)    == 2);
-   CHECK(gcd_use_mod(13, 15)  == 1);
-   CHECK(gcd_use_mod(121, 22) == 11);
-   CHECK(gcd_use_mod(201, 15) == 3);
-   CHECK(gcd_use_mod(20, 9)   == 1);
-   CHECK(gcd_use_mod(125, 15) == 5);
-   CHECK(gcd_use_mod(2, 1'234'567'890) == 2);
-   CHECK(gcd_use_mod(1, 1'234'567'890) == 1);
-}
-TEST_CASE("gcd_use_recursive_mod", "[gcd]") {
-   CHECK(gcd_use_recursive_mod(20,  15) ==  5);
-   CHECK(gcd_use_recursive_mod(4,    2) ==  2);
-   CHECK(gcd_use_recursive_mod(2,    2) ==  2);
-   CHECK(gcd_use_recursive_mod(13,  15) ==  1);
-   CHECK(gcd_use_recursive_mod(121, 22) ==  11);
-   CHECK(gcd_use_recursive_mod(201, 15) ==  3);
-   CHECK(gcd_use_recursive_mod(20,   9) ==  1);
-   CHECK(gcd_use_recursive_mod(125, 15) ==  5);
-   CHECK(gcd_use_recursive_mod(2, 1'234'567'890) == 2);
-   CHECK(gcd_use_recursive_mod(1, 1'234'567'890) == 1);
+TEMPLATE_TEST_CASE("calc_gcd", "[gcd][template]", gcd_euclideus_t, gcd_use_mod_t, gcd_use_recursive_mod_t, gcd_use_steins_algorithm_t) {
+   CHECK(TestType()( 20, 15) ==  5);
+   CHECK(TestType()(  4,  2) ==  2);
+   CHECK(TestType()(  2,  2) ==  2);
+   CHECK(TestType()( 13, 15) ==  1);
+   CHECK(TestType()(121, 22) == 11);
+   CHECK(TestType()(201, 15) ==  3);
+   CHECK(TestType()( 20,  9) ==  1);
+   CHECK(TestType()(125, 15) ==  5);
+   CHECK(TestType()(  2, 1234567890) == 2);
+   CHECK(TestType()(  1, 1234567890) == 1);
 }
 
 // ------------------------------------------------------------------

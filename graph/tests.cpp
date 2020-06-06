@@ -6,6 +6,8 @@
 #include <kosaraju.hpp>
 #include <graph.hpp>
 #include <topological_sort.hpp>
+#include <union_find.hpp>
+#include <spanning_tree.hpp>
 
 // ------------------------------------------------------------------
 TEST_CASE("common operations", "[graph]") {
@@ -52,7 +54,7 @@ TEST_CASE("common operations", "[graph]") {
 }
 
 // ------------------------------------------------------------------
-TEST_CASE("Kosaraju", "[graph]") {
+TEST_CASE("Kosaraju's algorithm", "[graph]") {
 
    SECTION("Kosaraju's algorithm") {
       graph::adjacency_vectors<8> g1{{
@@ -86,7 +88,7 @@ TEST_CASE("Kosaraju", "[graph]") {
 }
 
 // ------------------------------------------------------------------
-TEST_CASE("Demukron", "[graph]") {
+TEST_CASE("Demukron's algorithm", "[graph]") {
 
    SECTION("common functions") {
       graph::matrix_row<4> r1 = {2, 2, 2, 2};
@@ -135,5 +137,60 @@ TEST_CASE("Demukron", "[graph]") {
       }};
       const auto topology = graph::demukron(m);
       CHECK(topology.size() == 6);
+   }
+}
+
+// ------------------------------------------------------------------
+TEST_CASE("spanning trees algorithms", "[graph]") {
+
+   SECTION("disjoint sets") {
+      graph::disjoint_sets<7> ds;
+      CHECK(ds.merge(0, 3));
+      CHECK(ds.merge(2, 4));
+      CHECK(ds.merge(0, 1));
+      CHECK(ds.merge(3, 5));
+      CHECK(ds.merge(1, 4));
+      CHECK(ds.merge(4, 6));
+
+      CHECK_FALSE(ds.merge(5, 4));
+   }
+   constexpr auto vertexes_count = 7;
+   graph::weighted_adjacency_vectors<vertexes_count> wav{{
+      {{1,7}, {3,5}},
+      {{0,7}, {2,8}, {3,9}, {4,7}},
+      {{1,8}, {4,5}},
+      {{0,5}, {1,9}, {4,15}, {5,6}},
+      {{1,7}, {2,5}, {3,15}, {5,8}},
+      {{3,6}, {4,8}, {6,11}},
+      {{4,9}, {5,11}}
+   }};
+
+   SECTION("Boruvkas algorithm"){
+      const auto edges = graph::boruvkas_algorithm(wav);
+      CHECK(edges.size() == vertexes_count-1);
+      CHECK(graph::get_weight(edges) == 39);
+   }
+
+   SECTION("has cycle") {
+      graph::weighted_adjacency_vectors<5> w {{
+         {{1,0}},
+         {{0,1}},
+         {{3,0}},
+         {{2,0},{4,0}},
+         {{3,0}}
+      }};
+      CHECK_FALSE(graph::has_cycle(w));
+      w[0].emplace_back(graph::weighted_vertex_t{2,0});
+      w[2].emplace_back(graph::weighted_vertex_t{0,0});
+      CHECK_FALSE(graph::has_cycle(w));
+      w[1].emplace_back(graph::weighted_vertex_t{4,0});
+      w[4].emplace_back(graph::weighted_vertex_t{1,0});
+      CHECK(graph::has_cycle(w));
+   }
+
+   SECTION("Kruskals algorithm") {
+      const auto edges = graph::kruskals_algorithm(wav);
+      CHECK(edges.size() == vertexes_count-1);
+      CHECK(graph::get_weight(edges) == 39);
    }
 }
