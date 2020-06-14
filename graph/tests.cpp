@@ -3,8 +3,9 @@
 #include <catch.hpp>
 
 #include <dfs.hpp>
-#include <kosaraju.hpp>
+#include <dijkstra.hpp>
 #include <graph.hpp>
+#include <kosaraju.hpp>
 #include <topological_sort.hpp>
 #include <union_find.hpp>
 #include <spanning_tree.hpp>
@@ -193,4 +194,31 @@ TEST_CASE("spanning trees algorithms", "[graph]") {
       CHECK(edges.size() == vertexes_count-1);
       CHECK(graph::get_weight(edges) == 39);
    }
+}
+
+// ------------------------------------------------------------------
+TEST_CASE("dijkstra's algorithm", "[graph]") {
+
+   graph::weighted_adjacency_vectors<7> wav {{
+      {{1, 2}, {2, 3}, {3, 6}},                 // A
+      {{0, 2}, {3, 4}, {4, 9}},                 // B
+      {{0, 3}, {1, 4}, {3, 1}, {4, 7}, {5, 6}}, // C
+      {{0, 6}, {2, 1}, {5, 4}},                 // D
+      {{1, 9}, {2, 7}, {5, 1}, {6, 5}},         // E
+      {{2, 6}, {3, 4}, {4, 1}, {6, 8}},         // F
+      {{4, 5}, {5, 8}}                          // G
+   }};
+
+   const auto we = graph::dijkstras_algorithm<7>(wav);
+   const auto path_to_1 = graph::get_path_to(we, 1);
+   CHECK(path_to_1.first == "01");
+   CHECK(path_to_1.second == 2);
+
+   const auto path_to_5 = graph::get_path_to(we, 5);
+   CHECK(path_to_5.first == "0235");
+   CHECK(path_to_5.second == 8);
+
+   const auto path_to_6 = graph::get_path_to(we, 6);
+   CHECK(path_to_6.first == "023546");
+   CHECK(path_to_6.second == 14);
 }
