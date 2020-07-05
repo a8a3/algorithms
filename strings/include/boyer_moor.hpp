@@ -128,14 +128,14 @@ int boyer_moor(const std::string& text, const std::string& pattern) {
       if (p == -1) {
          return t; // pattern is matched
       }
-      const int pref_idx = prefixes[text[t+last_idx]];
+      const int pref_idx = prefixes[text[t+p]];
       const int suff_idx = suffixes[p+1];
 
       if (pref_idx == -1) {
          // symbol is not presented in pattern, move pattern to symbol position
          t += p + 1;
       } else {
-         t += std::max(last_idx - pref_idx, last_idx - suff_idx);
+         t += std::max(last_idx - pref_idx, suff_idx);
       }
    }
    return -1;
